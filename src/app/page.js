@@ -1917,10 +1917,18 @@ export default function Home() {
               aria-expanded={filtrosLigasAbiertos}
               aria-controls="match-league-filter-options"
             >
-              <span>{filtrosLigasAbiertos ? "▾" : "▸"} Filtrar ligas</span>
+              <span className="match-league-filter-label">
+                <svg aria-hidden="true" viewBox="0 0 20 20">
+                  <path d="M3 4h14l-5.5 6.2v4.3l-3 1.5v-5.8L3 4Z" />
+                </svg>
+                Filtrar ligas
+              </span>
               <span className="match-league-filter-count">
                 {ligasConPartidos.length - ligasOcultas.size}/{ligasConPartidos.length} activas
               </span>
+              <svg className="match-league-filter-chevron" aria-hidden="true" viewBox="0 0 20 20">
+                <path d="m5 7.5 5 5 5-5" />
+              </svg>
             </button>
             {filtrosLigasAbiertos && (
               <div id="match-league-filter-options" className="match-league-filters">
