@@ -33,6 +33,7 @@ const COMPETENCIAS = {
   europa_league:    { nombre: "UEFA Europa League",           corto: "Europa League" },
   conference_league: { nombre: "UEFA Conference League",      corto: "Conference League" },
   primera_nacional: { nombre: "Primera Nacional",             corto: "Primera Nacional" },
+  federal_a:        { nombre: "Federal A",                    corto: "Federal A" },
   primera_b_metro:  { nombre: "Primera B Metropolitana",      corto: "Primera B Metro" },
   primera_c:        { nombre: "Primera C",                    corto: "Primera C" },
   reserva:          { nombre: "Torneo de Reserva",            corto: "Reserva" },

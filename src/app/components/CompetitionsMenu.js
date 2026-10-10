@@ -14,7 +14,7 @@ const SHORTCUT_KEYS = [
 const COMPETITION_GROUPS = [
   {
     label: "ARGENTINA",
-    keys: ["argentina", "copa_argentina", "primera_nacional", "primera_b_metro", "primera_c", "reserva"],
+    keys: ["argentina", "copa_argentina", "primera_nacional", "federal_a", "primera_b_metro", "primera_c", "reserva"],
   },
   {
     label: "AMÉRICA",

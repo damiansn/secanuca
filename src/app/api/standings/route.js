@@ -47,6 +47,11 @@ const COMPETENCIAS = {
     redis: "chiquifutbol_primera_nacional",
   },
 
+  federal_a: {
+    nombre: "Federal A",
+    redis: "chiquifutbol_federal_a",
+  },
+
   primera_b_metro: {
     nombre: "Primera B Metropolitana",
     redis: "chiquifutbol_primera_b_metro",

@@ -58,6 +58,11 @@ const COMPETENCIAS = {
     url: "https://www.promiedos.com.ar/league/primera-nacional/ebj"
   },
 
+  federal_a: {
+    nombre: "Federal A",
+    url: "https://www.promiedos.com.ar/league/federal-a/fahi"
+  },
+
   primera_b_metro: {
     nombre: "Primera B Metro",
     url: "https://www.promiedos.com.ar/league/primera-b-metropolitana/fahh"
@@ -233,6 +238,7 @@ const REDIS_KEYS = {
   europa_league: "chiquifutbol_europa_league",
   conference_league: "chiquifutbol_conference_league",
   primera_nacional: "chiquifutbol_primera_nacional",
+  federal_a: "chiquifutbol_federal_a",
   primera_b_metro: "chiquifutbol_primera_b_metro",
   primera_c: "chiquifutbol_primera_c",
   reserva: "chiquifutbol_reserva",

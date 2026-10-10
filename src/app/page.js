@@ -73,6 +73,7 @@ function obtenerCompetition(league) {
   if (n.includes("reserva")) return "reserva";
   if (n.includes("femenin")) return "argentina";
   if (n.includes("primera nacional")) return "primera_nacional";
+  if (n.includes("federal a")) return "federal_a";
   if (n.includes("primera b metro") || n.includes("primera b metropolitana")) return "primera_b_metro";
   if (n.includes("primera c")) return "primera_c";
   if (n.includes("betplay") || n.includes("colombia")) return "colombia";

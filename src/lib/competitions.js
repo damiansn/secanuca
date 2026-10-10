@@ -7,6 +7,7 @@ export const COMPETITION_ITEMS = [
   { key: "europa_league", label: "Europa League", name: "UEFA Europa League" },
   { key: "conference_league", label: "Conference", name: "UEFA Conference League" },
   { key: "primera_nacional", label: "Nacional", name: "Primera Nacional" },
+  { key: "federal_a", label: "Federal A", name: "Federal A" },
   { key: "primera_b_metro", label: "B Metro", name: "Primera B Metropolitana" },
   { key: "primera_c", label: "Primera C", name: "Primera C" },
   { key: "reserva", label: "Reserva", name: "Torneo de Reserva" },
