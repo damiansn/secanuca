@@ -261,6 +261,124 @@ const ESCUDOS_POR_ID = {
   badhh: "jaguares-de-cordoba",
   hcae:  "junior-fc",
 
+// ---- La Liga (España) ----
+
+bgi:  "alaves",
+bee: "athletic-bilbao",
+bde: "atletico-madrid",
+bfi: "celta-vigo",
+bfg: "elche",
+bdc: "barcelona",
+bea: "getafe",
+bfa: "levante",
+bfc: "malaga",
+bed: "osasuna", 
+bdh: "racing-santander",
+bhe: "rayo-vallecano",
+bei: "deportivo-la-coruna",
+bdg: "espanyol",
+beg: "real-betis",
+bdb: "real-madrid",
+bfe: "real-sociedad",
+bdf: "sevilla",
+bdj: "valencia",
+bdd: "villarreal",
+
+
+// ---- Segunda División (España) ----
+
+
+// ---- Premier League (Inglaterra) ----
+
+bae: "arsenal",
+baj: "aston-villa",
+fa: "bournemouth",
+gd: "brentford",
+di: "brighton",
+bag: "chelsea",
+ce: "coventry",
+baf: "crystal-palace",
+bah: "everton",
+bca: "fulham",
+bb: "hull-city",
+j: "ipswich",
+dg: "leeds-united",
+bai: "liverpool",
+bba: "manchester-city",
+baf: "manchester-united",
+bbg: "newcastle-united",
+cj: "nottingham-forest",
+bbh: "sunderland",
+bbe: "tottenham",
+
+
+
+
+// ---- Serie A (Italia) ----
+cch: "ac-milan",
+ccf: "ac-roma",
+cdc: "atalanta",
+cef: "bologna",
+ced: "cagliari",
+gbbh: "como",
+cci: "fiorentina",
+cfe: "frosinone",
+cdb: "genoa",
+cce: "inter-milan",
+ccg: "juventus",
+cdg: "lazio",
+ceg: "lecce",
+cjd: "monza",
+cde: "napoli",
+ceb: "parma",
+cgg: "sassuolo",
+cdf: "torino",
+ccj: "udinese",
+dai: "venezia",
+
+
+// ---- Ligue 1 (Francia) ----
+
+ejd: "angers",
+ehg: "auxerre",
+fde: "brest",
+ehj: "strasbourg",
+eif: "le-havre",
+egi: "le-mans",
+eib: "lens",
+ehi: "lille",
+ehc: "lorient",
+egf: "lyon",
+ehb: "monaco",
+eha: "ogc-nice",
+egj: "olympique-de-marseille",
+gahf: "paris-fc",
+eia: "psg",
+ehh: "rennes",
+eic: "toulouse",
+eii: "troyes",
+
+// ---- Bundesliga (Alemania) ----
+
+dfa: "1.-fc-koln",
+ddd: "bayern-leverkusen",
+ddb: "bayern-munich",
+deb: "borussia-dortmund",
+dej: "borussia-monchengladbach",
+ddh: "eintracht-frankfurt",
+dfi: "fc-augsburg",
+dfe: "freiburg",
+dde: "hamburger-sv",
+dfb: "hoffenheim",
+dfc: "mainz-05",
+hbhb: "rb-leipzig",
+dgg: "sc-paderborn-07",
+ddf: "schalke-04",
+ddi: "stuttgart",
+ebi: "sv-07-elversberg",
+djc: "union-berlin",
+ddc: "werder-bremen",
+
   // ---- Copa de Primera (Paraguay) ----
   bcig:  "libertad",
   ifei:  "olimpia",
