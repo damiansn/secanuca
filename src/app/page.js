@@ -359,7 +359,6 @@ eic: "toulouse",
 eii: "troyes",
 
 // ---- Bundesliga (Alemania) ----
-
 dfa: "1.-fc-koln",
 ddd: "bayern-leverkusen",
 ddb: "bayern-munich",
@@ -378,6 +377,27 @@ ddi: "stuttgart",
 ebi: "sv-07-elversberg",
 djc: "union-berlin",
 ddc: "werder-bremen",
+
+// ---- Primeira Liga (Portugal) ----
+
+fdibb: "alverca",
+jch: "arouca",
+iii: "benfica",
+gdhc: "casa-pia-ac",
+jaj: "estoril",
+ghbed: "amadora",
+bbbhc: "famalicao",
+iih: "fc-porto",
+jaf: "gil-vicente-fc",
+iij: "guimaraes",
+ijc: "maritimo",
+hfhd: "moreirense",
+ije: "nacional-madeira",
+jae: "rio-ave",
+jdf: "santa-clara",
+ijf: "sc-braga",
+ija: "sporting-cp",
+bbbgd: "viseu",
 
   // ---- Copa de Primera (Paraguay) ----
   bcig:  "libertad",
