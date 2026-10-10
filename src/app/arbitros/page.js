@@ -227,7 +227,7 @@ export default function RefereesPage() {
                   setSelectedTeam("");
                   setStats(null);
                 }}
-                placeholder={selectedReferee ? "Ej.: Velez Sarfield" : "Primero seleccioná un árbitro"}
+                placeholder={selectedReferee ? "Ej.: Vélez Sarsfield" : "Primero seleccioná un árbitro"}
                 autoComplete="off"
                 style={{ ...controlStyle, opacity: selectedReferee ? 1 : 0.55 }}
               />
