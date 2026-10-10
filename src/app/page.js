@@ -2303,10 +2303,22 @@ export default function Home() {
                             const renderEvent = (event, eventIndex) => {
                               const type = Number(event?.type);
                               const label = type === 1 ? "Gol" : type === 4 ? "Tarjeta amarilla" : type === 6 ? "Tarjeta roja" : type === 15 ? "Cambio" : "Evento";
+                              const texts = (event?.texts || []).filter(Boolean);
+                              const scorer = type === 1 ? texts[0] : null;
+                              const assists = type === 1 ? texts.slice(1).join(" · ") : "";
                               return (
                                 <div key={`${type}-${eventIndex}`} style={{ display: "flex", alignItems: "center", gap: "5px", minWidth: 0, color: C.text }}>
                                   <img src={`https://api.promiedos.com.ar/images/games/event/${type}`} alt="" width="18" height="18" style={{ objectFit: "contain", flexShrink: 0 }} />
-                                  <span style={{ overflowWrap: "anywhere" }} title={label}>{(event?.texts || []).join(" · ") || label}</span>
+                                  {scorer && assists ? (
+                                    <span style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0, overflowWrap: "anywhere" }}>
+                                      <span>{scorer}</span>
+                                      <span style={{ color: "#93c5fd", fontSize: "9px", fontWeight: "bold" }}>
+                                        ↳ ASISTENCIA: <span style={{ color: C.textDim, fontWeight: "normal" }}>{assists}</span>
+                                      </span>
+                                    </span>
+                                  ) : (
+                                    <span style={{ overflowWrap: "anywhere" }} title={label}>{texts.join(" · ") || label}</span>
+                                  )}
                                 </div>
                               );
                             };
