@@ -397,7 +397,7 @@ jae: "rio-ave",
 jdf: "santa-clara",
 ijf: "sc-braga",
 ija: "sporting-cp",
-bbbgd: "viseu",
+bbbgd: "viseu", 
 
   // ---- Copa de Primera (Paraguay) ----
   bcig:  "libertad",
@@ -475,8 +475,51 @@ bbbgd: "viseu",
   bbgcj: "uai-urquiza",       
   bbjdd: "ituzaingo",
 
-  
-    // ---- Primera C ----
+
+  // ---- Federal A (Argentina) ----
+
+  hdffa: "9-de-julio-rafaela",
+  badei: "alvarado", 
+  gjfcc: "argentino-mm",
+  hdggf: "scyb-atenas",
+  jbiaa: "escobar-fc-(ing.-maschwitz)", 
+  iebih: "ca-bartolome-mitre-(posadas)",
+  hcce: "boca-unidos",
+  jcia: "cipolleti",
+  fhagc: "circulo-deportivo",
+  ieddg: "costa-brava-(gral-pico)",  
+  ieega: "cscyd-gimnasia-y-esgrima-(chivilcoy)",
+  beafg: "defensores-belgrano-(vr)",
+  jbifb:"defensores-de-vilelas-(puerto-vilelas)", 
+  fajej:"deportivo-rincon",
+  jcig:"douglas-haig",
+  bbjcf:"el-linqueno",
+  iebea: "fundacion-amigos-por-el-deporte", // no esta
+  cijfa: "germinal",
+  jcif: "gimnasia-de-concepcion-del-uruguay",
+  igeh: "guillermo-brown",
+  cdbje: "huracan-las-heras",
+  cbjbf: "independiente-chivilcoy",
+  jchh: "juventud-antoniana",
+  jcib: "juventud-unida-san-luis",
+  ehbej: "kimberley-mar-del-plata",
+  hcbg: "olimpo-de-bahia-blanca",
+  cijea: "san-martin-de-formosa",
+  bbjbg: "san-martin-mendoza",
+  jafd: "santamarina-tandil",
+  hjffj: "sarmiento-de-la-banda",
+  jdac: "sarmiento-de-resistencia",
+  cbjca: "sol-de-america",
+  bbijf: "sol-de-mayo",
+  jcie: "sportivo-belgrano",
+  ceeaj: "sportivo-las-parejas",
+  iebib: "club-tucuman-central-deportes",
+  bbjaf: "villa-mitre",
+
+
+
+
+  // ---- Primera C ----
   bbihj: "sacachispas",
   bbiia: "berazategui",
   bedhd: "lugano",
