@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import CompetitionsMenu from "../components/CompetitionsMenu.js";
+import AppNavbar from "../components/AppNavbar.js";
 
 const colors = {
   bg: "#0f1923",
@@ -142,14 +142,13 @@ export default function RefereesPage() {
 
   return (
     <main style={{ minHeight: "100vh", background: colors.bg, color: colors.text, fontFamily: "Arial, Tahoma, Verdana, sans-serif", fontSize: "12px" }}>
-      <header style={{ background: colors.blueDark, borderBottom: "2px solid #1e3a8a" }}>
-        <div className="referee-navbar-inner" style={{ maxWidth: "1000px", minHeight: "48px", margin: "0 auto", padding: "6px 12px", display: "flex", alignItems: "center", gap: "14px" }}>
-          <Link href="/" className="referee-home-link" style={{ color: colors.white, fontWeight: "bold", textDecoration: "none" }}>← SECANUCA</Link>
-          <span className="referee-title" style={{ color: colors.white, fontWeight: "bold" }}>HISTORIAL POR ÁRBITRO</span>
-          <div className="referee-competitions"><CompetitionsMenu compact /></div>
-        </div>
-      </header>
+      <AppNavbar />
       <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "12px" }}>
+        <div style={{ marginBottom: "10px", color: colors.muted, fontSize: "11px" }} aria-label="Ruta de navegación">
+          <Link href="/" style={{ color: colors.blue }}>Inicio</Link>
+          {" > "}
+          <span style={{ color: colors.text }}>Historial por Árbitro</span>
+        </div>
         <section style={{ padding: "14px", background: colors.surface, border: `1px solid ${colors.border}` }}>
           <h1 style={{ margin: "0 0 6px", color: colors.white, fontSize: "18px" }}>¿Cómo le va a tu equipo con este árbitro?</h1>
           <p style={{ margin: "0 0 14px", color: colors.muted, lineHeight: 1.5 }}>Elegí un árbitro y un equipo para consultar sus resultados cara a cara en los partidos dirigidos por ese árbitro.</p>

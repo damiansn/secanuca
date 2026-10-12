@@ -41,8 +41,77 @@ table {
   min-width: 0;
 }
 
-.home-navbar-inner {
-  width: 100%;
+.app-navbar {
+  background: #1d4ed8;
+  border-bottom: 2px solid #1e3a8a;
+}
+
+.app-navbar-inner {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: min(100%, 1024px);
+  min-height: 58px;
+  margin: 0 auto;
+  padding: 4px 12px;
+}
+
+.app-navbar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding-right: 10px;
+  border-right: 1px solid #2563eb;
+}
+
+.app-navbar-logo img {
+  display: block;
+  width: auto;
+  height: 48px;
+  object-fit: contain;
+}
+
+.app-navbar-competitions {
+  min-width: 0;
+}
+
+.app-navbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.team-search {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.team-search input:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 1px;
+}
+
+.app-navbar-referees {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 10px;
+  border-left: 1px solid #2563eb;
+  color: #bfdbfe;
+  font-size: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.app-navbar-referees:hover,
+.app-navbar-referees-active {
+  background: #1e3a8a;
+  color: #f8fafc;
 }
 
 .competition-nav {
@@ -251,82 +320,6 @@ input {
   min-height: 28px;
 }
 
-.match-search-container {
-  position: relative;
-  z-index: 5;
-  padding: 6px;
-  border-bottom: 1px solid #263244;
-  background: #1a2535;
-}
-
-.match-search-panel {
-  position: absolute;
-  top: 100%;
-  left: 6px;
-  z-index: 20;
-  width: min(520px, calc(100vw - 24px));
-  max-height: 70vh;
-  overflow-y: auto;
-  padding: 6px;
-  border: 1px solid #263244;
-  background: #1a2535;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
-}
-
-.match-search-wrap {
-  position: relative;
-  display: block !important;
-  width: 100%;
-}
-
-.match-search-input {
-  display: block;
-  width: min(360px, 100%) !important;
-  min-height: 40px;
-  font-size: 16px !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-.match-search-input:focus,
-.match-search-input:focus-visible,
-.match-search-input:active {
-  outline: none !important;
-  box-shadow: none !important;
-  border-color: #263244;
-}
-
-.match-search-panel [role="listbox"] {
-  position: static !important;
-  width: 100% !important;
-  max-height: 35vh;
-  overflow-y: auto;
-  box-shadow: none !important;
-}
-
-.match-search-panel [role="option"] {
-  min-height: 40px;
-}
-
-.match-search-close {
-  display: block;
-  margin: 6px 0 0 auto;
-  padding: 4px 10px;
-  border: 1px solid #263244;
-  background: #141e2b;
-  color: #94a3b8;
-}
-
-.match-fixture-panel {
-  margin-top: 6px;
-  max-height: 48vh;
-  overflow-y: auto;
-}
-
-.match-fixture-table-scroll {
-  overflow-x: auto;
-}
-
 .match-results-table {
   table-layout: fixed;
 }
@@ -467,8 +460,8 @@ input {
 }
 
 @media (min-width: 601px) and (max-width: 1200px) {
-  .home-nav-logo img {
-    height: 62px !important;
+  .app-navbar-logo img {
+    height: 48px;
   }
 
   .competition-pill,
@@ -483,71 +476,52 @@ input {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .home-navbar-inner {
+  .app-navbar-inner {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    padding: 0 8px;
+    gap: 4px 8px;
+    padding: 4px 8px;
   }
 
-  .home-nav-logo {
-    min-height: 52px;
-    padding: 3px 8px !important;
-    border-right: 0 !important;
-  }
-
-  .home-nav-logo img {
-    height: 48px !important;
-  }
-
-  .home-navbar-inner > .competition-menu {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    padding: 0 0 7px;
-  }
-
-  .home-referee-link {
-    justify-self: end;
-    padding: 10px 8px !important;
-    border-right: 0 !important;
-    border-left: 1px solid #2563eb;
-  }
-
-  .home-content {
-    padding: 6px !important;
-  }
-
-  .standings-navbar-inner,
-  .referee-navbar-inner {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 4px 8px !important;
-    padding: 4px 8px !important;
-  }
-
-  .standings-home-link,
-  .referee-home-link {
+  .app-navbar-logo {
     grid-column: 1;
     grid-row: 1;
-    padding: 6px 4px !important;
-    border-right: 0 !important;
+    justify-content: flex-start;
+    min-height: 44px;
+    padding: 0;
+    border-right: 0;
   }
 
-  .standings-referee-link,
-  .referee-title {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: end;
-    padding: 7px 4px !important;
-    text-align: right;
+  .app-navbar-logo img {
+    height: 42px;
   }
 
-  .standings-navbar-inner > .competition-menu,
-  .referee-competitions {
+  .app-navbar-competitions {
     grid-column: 1 / -1;
     grid-row: 2;
     width: 100%;
     padding-bottom: 4px;
+  }
+
+  .app-navbar-actions {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    gap: 5px;
+  }
+
+  .team-search input {
+    width: clamp(96px, 34vw, 132px) !important;
+    min-width: 0 !important;
+  }
+
+  .app-navbar-referees {
+    padding: 0 7px;
+  }
+
+  .home-content {
+    padding: 6px !important;
   }
 
   .competition-nav {
@@ -604,11 +578,6 @@ input {
   .competition-result {
     min-height: 42px;
     padding: 9px 10px;
-  }
-
-  .match-search-input {
-    width: 100% !important;
-    min-height: 40px;
   }
 
   .match-date-bar {

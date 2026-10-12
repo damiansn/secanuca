@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
-import CompetitionsMenu from "./components/CompetitionsMenu.js";
+import AppNavbar from "./components/AppNavbar.js";
 
 // ─── PALETA (misma que posiciones) ───────────────────────────────────────────
 const C = {
@@ -25,11 +25,6 @@ const C = {
 
 const S = {
   page:          { background: C.bg, color: C.text, minHeight: "100vh", fontFamily: "Arial, Tahoma, Verdana, sans-serif", fontSize: "11px" },
-  navbar:        { background: C.blueNav, padding: "0", borderBottom: "2px solid #1e3a8a" },
-  navInner:      { maxWidth: "1000px", margin: "0 auto", display: "flex", alignItems: "center" },
-  navLogo:       { color: C.white, fontWeight: "bold", fontSize: "14px", padding: "7px 12px", textDecoration: "none", borderRight: "1px solid #2563eb", whiteSpace: "nowrap" },
-  navLink:       { color: "#bfdbfe", fontSize: "11px", padding: "7px 10px", textDecoration: "none", borderRight: "1px solid #2563eb", display: "inline-block" },
-  navLinkActive: { color: C.white, background: "#1e3a8a", fontWeight: "bold" },
   wrap:          { maxWidth: "1000px", margin: "0 auto", padding: "4px", background: C.bg },
   topBar:        { background: C.surface, color: C.text, fontSize: "10px", padding: "4px 6px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${C.border}` },
   dateBar:       { display: "flex", gap: "3px", alignItems: "center", padding: "4px 6px", borderBottom: `1px solid ${C.border}`, background: C.surfaceAlt },
@@ -45,13 +40,6 @@ const S = {
   golesRow:      { display: "grid", gridTemplateColumns: "1fr 1fr", fontSize: "10px", color: C.textMuted, marginTop: "2px" },
   globalBadge:   { fontSize: "9px", color: C.textMuted, textAlign: "center", padding: "2px 0 0", display: "flex", justifyContent: "flex-start", alignItems: "center", gap: "5px", lineHeight: 1.2, whiteSpace: "nowrap" },
   redCard:       { display: "inline-block", width: "6px", height: "9px", background: C.red, marginLeft: "2px", verticalAlign: "middle" },
-  searchWrap:    { position: "relative", display: "inline-block" },
-  searchInput:   { background: C.surfaceAlt, border: `1px solid ${C.border}`, color: C.text, padding: "3px 7px", fontSize: "11px", width: "190px", outline: "none" },
-  dropdown:      { position: "absolute", top: "100%", left: 0, zIndex: 100, background: C.surface, border: `1px solid ${C.border}`, width: "220px", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" },
-  dropdownItem:  { padding: "5px 8px", cursor: "pointer", borderBottom: `1px solid ${C.borderSub}`, fontSize: "11px", color: C.text, background: "none", border: "none", width: "100%", textAlign: "left", display: "block" },
-  fixtureBox:    { border: `1px solid ${C.border}`, borderTop: "none", background: C.surface },
-  fixtureHead:   { background: C.amber, color: "#111111", padding: "3px 8px", fontSize: "11px", fontWeight: "bold", display: "flex", justifyContent: "space-between", alignItems: "center" },
-  closeBtn:      { background: C.red, border: "none", color: C.white, padding: "1px 6px", fontSize: "10px", cursor: "pointer", fontWeight: "bold" },
   errorBox:      { background: "rgba(239,68,68,0.1)", border: `1px solid ${C.red}`, color: C.red, padding: "4px 8px", fontSize: "11px", marginBottom: "4px" },
   loading:       { padding: "16px", textAlign: "center", color: C.textMuted, fontSize: "11px" },
   noMatches:     { padding: "16px", textAlign: "center", color: C.textMuted, border: `1px solid ${C.border}`, fontSize: "11px" },
@@ -1475,31 +1463,6 @@ function obtenerEstado(game) {
   return { texto: "Prog.", tipo: "pending" };
 }
 
-function obtenerRivalFixture(f) {
-  return f?.opponent || f?.rival || f?.opponent_name || f?.rival_name || f?.vs || f?.team_opponent || f?.teamOpponent || "";
-}
-
-function obtenerCondicionFixture(f) {
-  const c = String(f?.condicion || f?.homeAway || f?.home_away || f?.condition || f?.local_visitante || f?.localVisitante || "").trim().toUpperCase();
-  if (c === "L" || c.includes("LOCAL")) return "L";
-  if (c === "V" || c.includes("VISIT")) return "V";
-  return "";
-}
-
-function obtenerFechaHoraFixture(f) {
-  const fechaRaw = f?.date || f?.fecha || f?.day || "--/--";
-  const horaRaw = f?.hora || f?.time || f?.hour || f?.start_time || "--:--";
-  const mf = String(fechaRaw).trim().match(/^(\d{1,2})\/(\d{1,2})$/);
-  const mh = String(horaRaw).trim().match(/^(\d{1,2}):(\d{2})$/);
-  if (!mf || !mh) return { fecha: fechaRaw, hora: horaRaw };
-  const anio = Number(hoyArgentina().year);
-  const c = corregirFechaHora(+mf[1], +mf[2], anio, +mh[1], +mh[2]);
-  return { fecha: `${c.dia}/${c.mes}`, hora: c.hora };
-}
-function obtenerFechaFixture(f) { return obtenerFechaHoraFixture(f).fecha; }
-function obtenerHoraFixture(f) { return obtenerFechaHoraFixture(f).hora; }
-function obtenerCompetenciaFixture(f) { return f?.competencia || f?.competition || f?.league || f?.tournament || ""; }
-
 function EscudoImg({ team }) {
   const src = escudoLocal(team);
   if (!src) return null;
@@ -1527,12 +1490,6 @@ export default function Home() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [busquedaAbierta, setBusquedaAbierta] = useState(false);
-  const [search, setSearch] = useState("");
-  const [teams, setTeams] = useState([]);
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [teamFixtures, setTeamFixtures] = useState([]);
-  const [teamFixturesLoading, setTeamFixturesLoading] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [matchStats, setMatchStats] = useState(null);
   const [matchStatsLoading, setMatchStatsLoading] = useState(false);
@@ -1680,37 +1637,6 @@ export default function Home() {
     return () => window.removeEventListener("keydown", cerrarConEscape);
   }, [selectedMatch]);
 
-  useEffect(() => {
-    fetch("/api/team-fixture?list=true", { cache: "no-store" })
-      .then(r => r.json())
-      .then(j => setTeams(Array.isArray(j) ? j : []))
-      .catch(() => {});
-  }, []);
-
-  const equiposFiltrados = useMemo(() => {
-    const txt = search.trim().toLowerCase();
-    if (!txt) return [];
-    return teams.filter(t => (t.name || t.nombre || "").toLowerCase().includes(txt)).slice(0, 10);
-  }, [search, teams]);
-
-  async function seleccionarEquipo(team) {
-    setSelectedTeam(team);
-    setSearch(team.name || team.nombre || "");
-    setTeamFixtures([]);
-    try {
-      setTeamFixturesLoading(true);
-      const id = team.id || team.team_id || team.teamId;
-      const res = await fetch(`/api/team-fixture?team=${encodeURIComponent(id)}`, { cache: "no-store" });
-      if (!res.ok) throw new Error();
-      const json = await res.json();
-      setTeamFixtures(Array.isArray(json) ? json : Array.isArray(json.fixtures) ? json.fixtures : Array.isArray(json.matches) ? json.matches : []);
-    } catch {
-      setTeamFixtures([]);
-    } finally {
-      setTeamFixturesLoading(false);
-    }
-  }
-
   const hayPartidos = data.some(l => Array.isArray(l?.games) && l.games.length > 0);
 
   // Ligas con partidos
@@ -1742,144 +1668,13 @@ export default function Home() {
 
   return (
     <div style={S.page}>
-
-      {/* NAVBAR */}
-   <div style={S.navbar}>
-  <div className="home-navbar-inner" style={S.navInner}>
-    <a href="/" className="home-nav-logo" style={{ ...S.navLogo, display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
-      <img 
-        src="/logo.png" 
-        alt="Secanuca" 
-        style={{ height: "74px", width: "auto", objectFit: "contain", display: "block" }} 
-        onError={e => { e.currentTarget.style.display = "none"; }} 
-      />
-    </a>
-    <CompetitionsMenu />
-    <Link href="/arbitros" className="home-referee-link" style={{ ...S.navLink, borderLeft: "1px solid #2563eb" }}>
-      ÁRBITROS
-    </Link>
-  </div>
-</div>
+      <AppNavbar />
       <div className="home-content" style={S.wrap}>
 
         {/* BARRA SUPERIOR */}
         <div className="match-top-bar" style={S.topBar}>
           <span style={{ fontWeight: "bold" }}>RESULTADOS Y PARTIDOS EN VIVO</span>
         </div>
-        <div className="match-search-container">
-          <input
-            value={search}
-            onFocus={() => setBusquedaAbierta(true)}
-            onChange={e => {
-              setBusquedaAbierta(true);
-              setSearch(e.target.value);
-              if (selectedTeam) { setSelectedTeam(null); setTeamFixtures([]); }
-            }}
-            onKeyDown={e => {
-              if (e.key === "Escape") setBusquedaAbierta(false);
-            }}
-            placeholder="🔍 Buscar equipo..."
-            aria-label="Buscar equipo"
-            aria-expanded={busquedaAbierta}
-            aria-controls="match-search-panel"
-            className="match-search-input"
-            style={S.searchInput}
-          />
-          {busquedaAbierta && (
-            <div id="match-search-panel" className="match-search-panel">
-              {search.trim() && !selectedTeam && equiposFiltrados.length > 0 && (
-                <div style={S.dropdown} role="listbox" aria-label="Equipos encontrados">
-                  {equiposFiltrados.map(t => (
-                    <button key={t.id || t.name} role="option" onClick={() => seleccionarEquipo(t)} style={S.dropdownItem}>
-                      {t.name || t.nombre}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {search.trim() && !selectedTeam && equiposFiltrados.length === 0 && (
-                <div style={S.loading}>No se encontraron equipos.</div>
-              )}
-              {selectedTeam && (
-                <div className="match-fixture-panel" style={S.fixtureBox}>
-                  <div style={S.fixtureHead}>
-                    <span>⚽ PRÓXIMOS PARTIDOS: {(selectedTeam.name || selectedTeam.nombre || "").toUpperCase()}</span>
-                    <button style={S.closeBtn} onClick={() => { setSelectedTeam(null); setTeamFixtures([]); setSearch(""); }}>X</button>
-                  </div>
-                  {teamFixturesLoading ? (
-                    <div style={S.loading}>Cargando fixture...</div>
-                  ) : teamFixtures.length === 0 ? (
-                    <div style={S.loading}>Sin próximos partidos.</div>
-                  ) : (
-                    <div className="match-fixture-table-scroll">
-                      <table style={{ width: "100%", minWidth: "520px", borderCollapse: "collapse" }}>
-                        <thead>
-                          <tr style={{ background: C.surfaceAlt }}>
-                            <th style={{ padding: "3px 5px", textAlign: "left", borderBottom: `1px solid ${C.border}`, color: C.textMuted, fontSize: 10, width: "50px" }}>Fecha</th>
-                            <th style={{ padding: "3px 5px", textAlign: "center", borderBottom: `1px solid ${C.border}`, color: C.textMuted, fontSize: 10, width: "20px" }}>L/V</th>
-                            <th style={{ padding: "3px 5px", textAlign: "right", borderBottom: `1px solid ${C.border}`, color: C.textMuted, fontSize: 10 }}>Local</th>
-                            <th style={{ padding: "3px 5px", textAlign: "center", borderBottom: `1px solid ${C.border}`, color: C.textMuted, fontSize: 10, width: "50px" }}>Hora</th>
-                            <th style={{ padding: "3px 5px", textAlign: "left", borderBottom: `1px solid ${C.border}`, color: C.textMuted, fontSize: 10 }}>Visitante</th>
-                            <th style={{ padding: "3px 5px", textAlign: "right", borderBottom: `1px solid ${C.border}`, color: C.textMuted, fontSize: 10 }}>Competencia</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {teamFixtures.map((f, i) => {
-                            const rival = obtenerRivalFixture(f);
-                            const cond = obtenerCondicionFixture(f);
-                            const local = cond === "V" ? rival : (selectedTeam.name || selectedTeam.nombre || "");
-                            const visita = cond === "V" ? (selectedTeam.name || selectedTeam.nombre || "") : rival;
-                            const esLocal = cond !== "V";
-                            return (
-                              <tr key={f?.id || `${i}`} style={{ background: i % 2 === 0 ? C.surface : C.surfaceAlt, borderBottom: `1px solid ${C.borderSub}` }}>
-                                <td style={{ padding: "3px 5px", color: C.textMuted }}>{obtenerFechaFixture(f)}</td>
-                                <td style={{ padding: "3px 5px", textAlign: "center", fontWeight: "bold", color: cond === "L" ? C.green : cond === "V" ? C.blue : C.textMuted }}>{cond}</td>
-                                <td style={{ padding: "3px 5px", textAlign: "right", fontWeight: esLocal ? "bold" : "normal", color: esLocal ? C.white : C.textDim }}>{local}</td>
-                                <td style={{ padding: "3px 5px", textAlign: "center", fontWeight: "bold", color: C.amber }}>{obtenerHoraFixture(f)}</td>
-                                <td style={{ padding: "3px 5px", fontWeight: !esLocal ? "bold" : "normal", color: !esLocal ? C.white : C.textDim }}>{visita}</td>
-                                <td style={{ padding: "3px 5px", textAlign: "right" }}>
-                                  {(() => {
-                                    const comp = obtenerCompetenciaFixture(f);
-                                    if (!comp) return null;
-                                    const cl = comp.toLowerCase();
-                                    let bg = "rgba(100,116,139,0.2)", color = "#94a3b8";
-                                    if (cl.includes("libertador")) { bg = "rgba(16,185,129,0.15)"; color = "#10b981"; }
-                                    else if (cl.includes("sudamerican")) { bg = "rgba(245,158,11,0.15)"; color = "#f59e0b"; }
-                                    else if (cl.includes("copa argentina")) { bg = "rgba(56,189,248,0.15)"; color = "#38bdf8"; }
-                                    else if (cl.includes("liga profesional") || cl.includes("primera")) { bg = "rgba(59,130,246,0.15)"; color = "#3b82f6"; }
-                                    else if (cl.includes("champions")) { bg = "rgba(168,85,247,0.15)"; color = "#a855f7"; }
-                                    else if (cl.includes("copa de la liga")) { bg = "rgba(59,130,246,0.1)"; color = "#60a5fa"; }
-                                    return (
-                                      <span style={{
-                                        background: bg, color, fontSize: "9px", fontWeight: "bold",
-                                        padding: "1px 5px", borderRadius: "3px", whiteSpace: "nowrap",
-                                        border: `1px solid ${color}33`
-                                      }}>
-                                        {comp}
-                                      </span>
-                                    );
-                                  })()}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    className="match-search-close"
-                    onClick={() => setBusquedaAbierta(false)}
-                    aria-label="Cerrar panel de búsqueda"
-                  >
-                    Cerrar
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
         {/* NAVEGACIÓN TEMPORAL */}
         <div className="match-date-bar" style={S.dateBar}>
           <button className="match-date-button" onClick={() => moverDia(-1)} style={S.dateBtn} aria-label="Día anterior">&#9664;</button>

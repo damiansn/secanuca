@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import CompetitionsMenu from "../components/CompetitionsMenu.js";
+import AppNavbar from "../components/AppNavbar.js";
 
 // ─── PALETA OSCURA ────────────────────────────────────────────────────────────
 const C = {
@@ -106,29 +106,6 @@ function formatearFechaHora(raw) {
   let d = m[1], mo = m[2];
   if (h >= 24) { h -= 24; }
   return `${d}/${mo} ${String(h).padStart(2,"0")}:${m[5]}`;
-}
-
-// ─── NAVBAR ───────────────────────────────────────────────────────────────────
-
-function Navbar({ competition }) {
-  return (
-    <nav style={{ background: C.blueNav, borderBottom: "2px solid #1e3a8a" }}>
-      <div className="standings-navbar-inner" style={{ maxWidth: 1000, margin: "0 auto", display: "flex", alignItems: "center" }}>
-        <Link href="/" className="standings-home-link" aria-label="Secanuca, inicio" style={{ color: C.white, fontWeight: "bold", fontSize: 14, padding: "4px 12px", textDecoration: "none", borderRight: "1px solid #2563eb", whiteSpace: "nowrap", display: "flex", alignItems: "center" }}>
-          <img
-            src="/logo.png"
-            alt="Secanuca"
-            style={{ height: "42px", width: "auto", objectFit: "contain", display: "block" }}
-            onError={e => { e.currentTarget.style.display = "none"; }}
-          />
-        </Link>
-        <CompetitionsMenu compact activeCompetition={competition} />
-        <Link href="/arbitros" className="standings-referee-link" style={{ color: "#bfdbfe", fontSize: 11, padding: "7px 10px", textDecoration: "none", borderRight: "1px solid #2563eb", marginLeft: "auto" }}>
-          ÁRBITROS
-        </Link>
-      </div>
-    </nav>
-  );
 }
 
 // ─── TABLA DE POSICIONES ──────────────────────────────────────────────────────
@@ -641,7 +618,7 @@ function PosicionesContent() {
 
   if (loading) return (
     <div style={{ background: C.bg, minHeight: "100vh" }}>
-      <Navbar competition={competition} />
+      <AppNavbar activeCompetition={competition} />
       <div style={wrapStyle}>
         <div style={{ padding: 30, textAlign: "center", color: C.textMuted, fontSize: 12 }}>Cargando posiciones...</div>
       </div>
@@ -663,7 +640,7 @@ function PosicionesContent() {
 
   return (
     <div style={{ background: C.bg, minHeight: "100vh", fontFamily: "Arial, Tahoma, Verdana, sans-serif", fontSize: 11, color: C.text }}>
-      <Navbar competition={competition} />
+      <AppNavbar activeCompetition={competition} />
       <div style={wrapStyle}>
 
         {/* BREADCRUMB */}
