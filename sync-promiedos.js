@@ -2,6 +2,7 @@ import puppeteer from "puppeteer";
 import Redis from "ioredis";
 import dotenv from "dotenv";
 import { agregarPenalesScrapeados } from "./src/lib/promiedos-penalties.js";
+import { REFEREE_MATCHES_REDIS_KEY } from "./src/lib/referee-matches.js";
 
 dotenv.config();
 
@@ -443,6 +444,115 @@ function normalizarTexto(texto) {
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim();
+}
+
+function obtenerArbitroPartido(game) {
+  const gameInfo = Array.isArray(game?.game_info) ? game.game_info : [];
+  const refereeInfo = gameInfo.find(info => {
+    const name = normalizarTexto(info?.name);
+    return name.includes("arbitro") || name.includes("referee");
+  });
+  const referee = refereeInfo?.value
+    ?? game?.referee?.name
+    ?? game?.referee_name
+    ?? game?.referee;
+  return typeof referee === "string" ? referee.trim() : "";
+}
+
+function esPartidoFinalizado(game) {
+  if (Number(game?.status?.enum) === 3) return true;
+  const statusText = [
+    game?.status?.name,
+    game?.status?.description,
+    game?.game_time_status_to_display,
+    game?.status_text,
+  ].filter(value => typeof value === "string").join(" ").toLowerCase();
+  return statusText.includes("final") || statusText.includes("finished");
+}
+
+async function obtenerArbitroDePromiedos(gameId) {
+  const response = await fetch(`https://api.promiedos.com.ar/gamecenter/${encodeURIComponent(gameId)}`, {
+    headers: {
+      Accept: "application/json",
+      "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+      Origin: "https://www.promiedos.com.ar",
+      Referer: "https://www.promiedos.com.ar/",
+      "X-Ver": "1.11.7.5",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
+    },
+    signal: AbortSignal.timeout(10000),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Promiedos devolvió HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+  const referee = obtenerArbitroPartido(data?.game);
+  if (!referee) throw new Error("El detalle del partido no informa el árbitro");
+  return referee;
+}
+
+async function registrarPartidosFinalizados(partidos) {
+  let registrados = 0;
+
+  for (const league of partidos) {
+    const leagueName = String(league?.name ?? league?.nombre ?? league?.title ?? league?.league_name ?? "").trim();
+    const leagueKey = normalizarTexto(league?.key ?? "");
+    const normalizedLeague = normalizarTexto(leagueName);
+    if (
+      (!normalizedLeague.includes("liga profesional") && leagueKey !== "argentina")
+      || normalizedLeague.includes("reserva")
+    ) {
+      continue;
+    }
+
+    for (const game of league?.games || []) {
+      if (!esPartidoFinalizado(game) || !game?.id) continue;
+      const id = String(game.id);
+      if (!/^[a-z0-9]{1,32}$/i.test(id)) continue;
+      if (await redis.hexists(REFEREE_MATCHES_REDIS_KEY, id)) continue;
+
+      try {
+        const teams = obtenerEquiposPartido(game);
+        const homeTeam = obtenerNombreEquipo(teams[0]);
+        const awayTeam = obtenerNombreEquipo(teams[1]);
+        const homeGoals = obtenerScoreEquipo(game, 0);
+        const awayGoals = obtenerScoreEquipo(game, 1);
+        const matchDate = String(game.start_time ?? game.date ?? game.matchDate ?? "").trim();
+        if (!homeTeam || !awayTeam || homeGoals === null || awayGoals === null || !matchDate) {
+          throw new Error("Faltan fecha, equipos o resultado en el partido finalizado");
+        }
+
+        const referee = obtenerArbitroPartido(game) || await obtenerArbitroDePromiedos(id);
+        const season = matchDate.match(/\b(20\d{2})\b/)?.[1];
+        if (!season) throw new Error("No se pudo determinar la temporada del partido");
+        const match = {
+          id,
+          matchDate,
+          Country: "Argentina",
+          League: leagueName || "Liga Profesional",
+          Season: season,
+          homeTeam,
+          awayTeam,
+          referee,
+          FTHG: String(homeGoals),
+          FTAG: String(awayGoals),
+          FTR: homeGoals > awayGoals ? "H" : homeGoals < awayGoals ? "A" : "D",
+        };
+
+        await redis.hset(REFEREE_MATCHES_REDIS_KEY, id, JSON.stringify(match));
+        registrados += 1;
+        console.log(`Partido de árbitros registrado: ${match.homeTeam} ${homeGoals}-${awayGoals} ${awayTeam} (${referee})`);
+      } catch (error) {
+        console.error(`No se pudo registrar el partido finalizado ${id}:`, error.message);
+      }
+    }
+  }
+
+  if (registrados > 0) {
+    console.log(`Nuevos partidos agregados al historial de árbitros: ${registrados}`);
+  }
 }
 
 // ==========================================
@@ -2379,6 +2489,10 @@ async function sincronizarPartidos(
         normalizarLeagues(
           leagues
         );
+
+      if (tipo === "today" || tipo === "ayer") {
+        await registrarPartidosFinalizados(partidos);
+      }
 
       const penalesScrapeados = agregarPenalesScrapeados(
         partidos,

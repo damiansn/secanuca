@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import Redis from "ioredis";
+import { REFEREE_MATCHES_REDIS_KEY, toRefereeMatch } from "../../../lib/referee-matches.js";
 
 const DATA_FILES = [
   "referee-matches-history.csv",
   "referee-matches-current.csv",
 ];
 
-let matchesPromise;
+const redis = new Redis(process.env.REDIS_URL);
+let csvMatchesPromise;
 
 function parseCsv(text) {
   const rows = [];
@@ -60,46 +63,40 @@ function normalize(value) {
     .replace(/[^a-z0-9]/g, "");
 }
 
-function parseMatchDate(value) {
-  const match = String(value || "").match(/^(\d{2})-(\d{2})-(\d{2}|\d{4})(?:\s+(\d{2}):(\d{2}))?$/);
-  if (!match) return 0;
-  const year = Number(match[3]) < 100 ? 2000 + Number(match[3]) : Number(match[3]);
-  return new Date(year, Number(match[2]) - 1, Number(match[1]), Number(match[4] || 0), Number(match[5] || 0)).getTime();
-}
-
-async function loadMatches() {
-  if (!matchesPromise) {
-    matchesPromise = Promise.all(
+async function loadCsvMatches() {
+  if (!csvMatchesPromise) {
+    csvMatchesPromise = Promise.all(
       DATA_FILES.map(file => readFile(path.join(process.cwd(), "src", "data", file), "utf8"))
     ).then(contents => {
       const byId = new Map();
       for (const text of contents) {
         for (const row of parseCsv(text)) {
-          if (!row.id || !row.referee || !row.homeTeam || !row.awayTeam) continue;
-          const homeGoals = Number(row.FTHG);
-          const awayGoals = Number(row.FTAG);
-          if (!Number.isFinite(homeGoals) || !Number.isFinite(awayGoals)) continue;
-          byId.set(row.id, {
-            id: row.id,
-            date: row.matchDate,
-            timestamp: parseMatchDate(row.matchDate),
-            competition: row.League,
-            season: row.Season,
-            referee: row.referee,
-            homeTeam: row.homeTeam,
-            awayTeam: row.awayTeam,
-            homeGoals,
-            awayGoals,
-          });
+          const match = toRefereeMatch(row);
+          if (match) byId.set(match.id, match);
         }
       }
       return [...byId.values()];
     }).catch(error => {
-      matchesPromise = undefined;
+      csvMatchesPromise = undefined;
       throw error;
     });
   }
-  return matchesPromise;
+  return csvMatchesPromise;
+}
+
+async function loadMatches() {
+  const [csvMatches, storedMatches] = await Promise.all([
+    loadCsvMatches(),
+    redis.hvals(REFEREE_MATCHES_REDIS_KEY),
+  ]);
+  const byId = new Map(csvMatches.map(match => [match.id, match]));
+
+  for (const value of storedMatches) {
+    const match = toRefereeMatch(JSON.parse(value));
+    if (match) byId.set(match.id, match);
+  }
+
+  return [...byId.values()];
 }
 
 export async function GET(request) {
