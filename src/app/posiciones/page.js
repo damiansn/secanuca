@@ -75,6 +75,15 @@ function obtenerValor(fila, key) {
   return fila.values.find(v => v.key === key)?.value ?? "";
 }
 
+function obtenerResultadoUltimo(valor) {
+  switch (String(valor).trim()) {
+    case "1": return { letra: "V", nombre: "Victoria", color: C.green };
+    case "2": return { letra: "E", nombre: "Empate", color: C.amber };
+    case "0": return { letra: "D", nombre: "Derrota", color: C.red };
+    default: return null;
+  }
+}
+
 function obtenerNombreEquipo(fila) {
   return fila?.entity?.object?.name || fila?.entity?.object?.short_name || "Equipo";
 }
@@ -164,9 +173,35 @@ function TablaPosiciones({ item }) {
                   </td>
                   {columns.map(c => {
                     const v = obtenerValor(fila, c.key);
+                    const esColumnaUltimas = `${c.title || ""} ${c.key || ""}`
+                      .normalize("NFD")
+                      .replace(/[\u0300-\u036f]/g, "")
+                      .toLowerCase()
+                      .includes("ultima");
+                    const ultimos = Array.isArray(v)
+                      ? v
+                      : typeof v === "string" && /^[012\s,.-]+$/.test(v)
+                        ? v.match(/[012]/g) || []
+                        : [v];
                     return (
                       <td key={c.key} style={{ ...tdCenterS, fontWeight: c.is_bold ? 800 : 400, color: c.is_bold ? C.white : C.textDim }}>
-                        {Array.isArray(v) ? v.join(" ") : v}
+                        {esColumnaUltimas ? (
+                          <span style={{ display: "inline-flex", justifyContent: "center", gap: 4 }}>
+                            {ultimos.map((resultado, index) => {
+                              const estado = obtenerResultadoUltimo(resultado);
+                              return (
+                                <span
+                                  key={`${c.key}-${index}`}
+                                  aria-label={estado?.nombre}
+                                  title={estado?.nombre}
+                                  style={{ color: estado?.color, fontWeight: 800 }}
+                                >
+                                  {estado?.letra || resultado}
+                                </span>
+                              );
+                            })}
+                          </span>
+                        ) : Array.isArray(v) ? v.join(" ") : v}
                       </td>
                     );
                   })}
@@ -616,6 +651,15 @@ function PosicionesContent() {
   const tablas       = obtenerTablas();
   const brackets     = obtenerBrackets();
   const estadisticas = obtenerEstadisticas();
+  const tablaGrupoA = competition === "argentina"
+    ? tablas.find(item => /\b(?:grupo|zona)\s*a\b/i.test(item.grupo))
+    : null;
+  const tablaGrupoB = tablaGrupoA
+    ? tablas.find(item => item.torneo === tablaGrupoA.torneo && /\b(?:grupo|zona)\s*b\b/i.test(item.grupo))
+      || tablas.find(item => /\b(?:grupo|zona)\s*b\b/i.test(item.grupo))
+    : null;
+  const tablasDestacadas = tablaGrupoA && tablaGrupoB ? [tablaGrupoA, tablaGrupoB] : [];
+  const tablasRestantes = tablas.filter(item => !tablasDestacadas.includes(item));
 
   return (
     <div style={{ background: C.bg, minHeight: "100vh", fontFamily: "Arial, Tahoma, Verdana, sans-serif", fontSize: 11, color: C.text }}>
@@ -635,6 +679,17 @@ function PosicionesContent() {
         <div style={{ fontSize: 13, fontWeight: 800, color: C.white, borderBottom: `2px solid ${C.blueNav}`, paddingBottom: 4, marginBottom: 6 }}>
           {(data?.league?.name || compConfig.nombre).toUpperCase()}
         </div>
+
+        {tablasDestacadas.length > 0 && (
+          <>
+            <div style={sectionTitleStyle}>▶ TABLAS DE POSICIONES</div>
+            <div className="standings-tables-grid">
+              {tablasDestacadas.map((item, i) => (
+                <TablaPosiciones key={`${item.torneo}-${item.grupo}-${i}`} item={item} />
+              ))}
+            </div>
+          </>
+        )}
 
         {error && (
           <div style={{ background: "rgba(239,68,68,0.1)", border: `1px solid ${C.red}`, color: C.red, padding: "5px 8px", fontSize: 11, marginBottom: 6 }}>
@@ -732,11 +787,13 @@ function PosicionesContent() {
         )}
 
         {/* TABLAS DE POSICIONES */}
-        {tablas.length > 0 && (
+        {tablasRestantes.length > 0 && (
           <>
-            <div style={sectionTitleStyle}>▶ TABLAS DE POSICIONES</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 6, alignItems: "start" }}>
-              {tablas.map((item, i) => (
+            <div style={sectionTitleStyle}>
+              ▶ {tablasDestacadas.length > 0 ? "OTRAS TABLAS DE POSICIONES" : "TABLAS DE POSICIONES"}
+            </div>
+            <div className="standings-tables-grid">
+              {tablasRestantes.map((item, i) => (
                 <TablaPosiciones key={`${item.torneo}-${item.grupo}-${i}`} item={item} />
               ))}
             </div>
