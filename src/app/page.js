@@ -1546,7 +1546,7 @@ export default function Home() {
       home: nombreEquipo(obtenerEquipo(game, 0)),
       away: nombreEquipo(obtenerEquipo(game, 1)),
       league: normalizarNombre(league),
-      status: estado.texto,
+      status: estado?.texto || "",                    //PARA APP
     });
     setMatchStats(null);
     setMatchStatsError("");
@@ -2040,7 +2040,7 @@ export default function Home() {
                             <td className="match-details-cell" style={{ padding: "4px 6px", verticalAlign: "middle" }}>
                               <LineaPartido
                                 type={puedeVerEstadisticas ? "button" : undefined}
-                                onClick={puedeVerEstadisticas ? () => seleccionarPartido(game, league) : undefined}
+                                onClick={puedeVerEstadisticas ? () => seleccionarPartido(game, league, estado) : undefined}      //PARA APP
                                 title={puedeVerEstadisticas ? "Ver estadísticas del partido" : undefined}
                                 aria-label={puedeVerEstadisticas ? `Ver estadísticas de ${nombreEquipo(teamA)} contra ${nombreEquipo(teamB)}` : undefined}
                                 style={{
