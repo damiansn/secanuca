@@ -63,6 +63,30 @@ function obtenerCompetencia(fixture) {
   return fixture?.competencia || fixture?.competition || fixture?.league || fixture?.tournament || "";
 }
 
+function obtenerEstiloCompetencia(nombre) {
+  const competencia = String(nombre)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+  if (competencia.includes("sudamericana")) {
+    return { color: "#f59e0b", background: "rgba(245,158,11,0.14)" };
+  }
+  if (competencia.includes("libertadores")) {
+    return { color: "#10b981", background: "rgba(16,185,129,0.14)" };
+  }
+  if (competencia.includes("copa argentina")) {
+    return { color: "#38bdf8", background: "rgba(56,189,248,0.14)" };
+  }
+  if (competencia.includes("champions")) {
+    return { color: "#a855f7", background: "rgba(168,85,247,0.14)" };
+  }
+  if (competencia.includes("liga") || competencia.includes("primera")) {
+    return { color: "#60a5fa", background: "rgba(59,130,246,0.14)" };
+  }
+  return { color: "#94a3b8", background: "rgba(148,163,184,0.12)" };
+}
+
 function obtenerFechaHora(fixture) {
   const fecha = fixture?.date || fixture?.fecha || fixture?.day || "--/--";
   const hora = fixture?.hora || fixture?.time || fixture?.hour || fixture?.start_time || "--:--";
@@ -222,11 +246,17 @@ export default function TeamSearch() {
                   const opponent = obtenerNombre(fixture);
                   const local = homeAway === "Visitante" ? opponent : teamName;
                   const visitante = homeAway === "Visitante" ? teamName : opponent;
+                  const competencia = obtenerCompetencia(fixture);
+                  const estiloCompetencia = obtenerEstiloCompetencia(competencia);
                   return (
                     <div key={fixture?.id || `${teamName}-${index}`} style={{ display: "grid", gridTemplateColumns: "66px minmax(0, 1fr)", gap: "2px 8px", padding: "7px 9px", borderTop: "1px solid #1e2d3d", background: index % 2 === 0 ? "#1a2535" : "#141e2b" }}>
                       <span style={{ color: "#94a3b8" }}>{obtenerFechaHora(fixture)}</span>
                       <strong style={{ color: "#e2e8f0" }}>{local} – {visitante}</strong>
-                      <span style={{ gridColumn: "1 / -1", color: "#94a3b8" }}>{obtenerCompetencia(fixture)}</span>
+                      {competencia && (
+                        <span style={{ gridColumn: "1 / -1", justifySelf: "start", padding: "2px 6px", borderRadius: 3, color: estiloCompetencia.color, background: estiloCompetencia.background, fontSize: 10, fontWeight: 700 }}>
+                          {competencia}
+                        </span>
+                      )}
                     </div>
                   );
                 })
