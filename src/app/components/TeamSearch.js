@@ -14,11 +14,6 @@ const styles = {
     fontSize: "11px",
   },
   panel: {
-    position: "absolute",
-    top: "calc(100% + 4px)",
-    right: 0,
-    zIndex: 30,
-    width: "min(430px, calc(100vw - 16px))",
     maxHeight: "min(60vh, 420px)",
     overflow: "auto",
     border: "1px solid #263244",

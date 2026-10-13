@@ -89,6 +89,14 @@ table {
   flex: 0 0 auto;
 }
 
+.team-search-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 30;
+  width: min(430px, calc(100vw - 16px));
+}
+
 .team-search input:focus-visible {
   outline: 2px solid #93c5fd;
   outline-offset: 1px;
@@ -505,10 +513,21 @@ input {
   }
 
   .app-navbar-actions {
+    position: relative;
     grid-column: 2;
     grid-row: 1;
     justify-self: end;
     gap: 5px;
+  }
+
+  .team-search {
+    position: static;
+  }
+
+  .team-search-panel {
+    top: calc(100% + 4px);
+    right: 0;
+    width: calc(100vw - 16px);
   }
 
   .team-search input {
