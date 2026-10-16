@@ -64,6 +64,11 @@ function normalize(value) {
     .replace(/[^a-z0-9]/g, "");
 }
 
+function isExcludedReferee(referee) {
+  const name = normalize(referee);
+  return name.includes("robledo") || name.includes("amiconi");
+}
+
 async function loadCsvMatches() {
   if (!csvMatchesPromise) {
     csvMatchesPromise = readFile(path.join(process.cwd(), "src", "data", DATA_FILE), "utf8")
@@ -71,7 +76,9 @@ async function loadCsvMatches() {
         const byIdentity = new Map();
         for (const [index, row] of parseCsv(contents).entries()) {
           const match = toRefereeMatch({ ...row, id: row.id || `csv-row-${index + 1}` });
-          if (match) byIdentity.set(refereeMatchIdentity(match), match);
+          if (match && !isExcludedReferee(match.referee)) {
+            byIdentity.set(refereeMatchIdentity(match), match);
+          }
         }
         return [...byIdentity.values()];
       }).catch(error => {
@@ -91,7 +98,9 @@ async function loadMatches() {
 
   for (const value of storedMatches) {
     const match = toRefereeMatch(JSON.parse(value));
-    if (match) byIdentity.set(refereeMatchIdentity(match), match);
+    if (!match || isExcludedReferee(match.referee)) continue;
+    const identity = refereeMatchIdentity(match);
+    if (!byIdentity.has(identity)) byIdentity.set(identity, match);
   }
 
   return [...byIdentity.values()];
