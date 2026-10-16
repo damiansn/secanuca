@@ -69,6 +69,16 @@ function isExcludedReferee(referee) {
   return name.includes("robledo") || name.includes("amiconi");
 }
 
+function isUpdatedReferee(referee) {
+  const name = normalize(referee);
+  return (
+    (name.includes("facundo") && name.includes("tello"))
+    || (name.includes("sebastian") && name.includes("martinez"))
+    || (name.includes("sebastian") && name.includes("zunino"))
+    || (name.includes("yael") && name.includes("falcon"))
+  );
+}
+
 async function loadCsvMatches() {
   if (!csvMatchesPromise) {
     csvMatchesPromise = readFile(path.join(process.cwd(), "src", "data", DATA_FILE), "utf8")
@@ -98,7 +108,7 @@ async function loadMatches() {
 
   for (const value of storedMatches) {
     const match = toRefereeMatch(JSON.parse(value));
-    if (!match || isExcludedReferee(match.referee)) continue;
+    if (!match || isExcludedReferee(match.referee) || isUpdatedReferee(match.referee)) continue;
     const identity = refereeMatchIdentity(match);
     if (!byIdentity.has(identity)) byIdentity.set(identity, match);
   }
