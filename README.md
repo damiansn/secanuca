@@ -36,7 +36,7 @@ El workflow de GitHub Actions está en `.github/workflows/sync.yml` y necesita q
 
 El sincronizador `sync-promiedos.js` escribe los datos que consume la aplicación. Las claves Redis actuales usan el prefijo `chiquifutbol_` por compatibilidad con los datos existentes; no cambiar ese prefijo sin actualizar conjuntamente el sincronizador y las rutas de API.
 
-Los partidos finalizados de Liga Profesional se incorporan automáticamente al historial de árbitros durante esa sincronización (cada cinco minutos). El registro se guarda sin vencimiento en Redis, identificado por el ID del partido para evitar duplicados, y se consulta junto con el historial CSV hasta 2025. Para que un partido nuevo figure, Promiedos debe proporcionar su resultado y árbitro en el detalle del partido.
+El historial por árbitro parte de `src/data/referee-matches.csv`, con las columnas `Date`, `Country`, `League`, `Season`, `HomeTeam`, `AwayTeam`, `Referee`, `FTHG`, `FTAG`, `FTR`, `Fouls`, `Cards`, `Reds` y `Penalties`. Los partidos finalizados de Liga Profesional se incorporan automáticamente durante la sincronización (cada cinco minutos) y se guardan sin vencimiento en Redis, identificados por el ID de Promiedos para evitar duplicados. La interfaz consulta ambas fuentes. Para que un partido nuevo figure, Promiedos debe proporcionar su resultado y árbitro en el detalle del partido.
 
 ## Despliegue
 

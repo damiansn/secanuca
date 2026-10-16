@@ -273,26 +273,31 @@ export default function RefereesPage() {
               <div style={{ marginTop: "8px", padding: "16px", textAlign: "center", color: colors.muted, background: colors.surface, border: `1px solid ${colors.border}` }}>No hay partidos en esta combinación para el período seleccionado.</div>
             ) : (
               <div style={{ marginTop: "8px", overflowX: "auto", background: colors.surface, border: `1px solid ${colors.border}` }}>
-                <table style={{ minWidth: "590px", borderCollapse: "collapse" }}>
+                <table style={{ minWidth: "1120px", borderCollapse: "collapse" }}>
                   <thead>
                     <tr style={{ color: colors.muted, background: colors.surfaceAlt, textAlign: "left" }}>
-                      {["Fecha", "Partido", "Resultado", "Liga", "Temporada"].map(label => <th key={label} style={{ padding: "8px", borderBottom: `1px solid ${colors.border}` }}>{label}</th>)}
+                      {["Fecha", "País", "Liga", "Temporada", "Árbitro", "Local", "Goles", "Visitante", "FTR", "Faltas", "Amarillas", "Rojas", "Penales", "Resultado del equipo"].map(label => <th key={label} style={{ padding: "8px", borderBottom: `1px solid ${colors.border}`, whiteSpace: "nowrap" }}>{label}</th>)}
                     </tr>
                   </thead>
                   <tbody>
                     {stats.matches.map(match => (
                       <tr key={match.id} style={{ borderBottom: `1px solid ${colors.borderSub}` }}>
                         <td style={{ padding: "8px", whiteSpace: "nowrap" }}>{match.date}</td>
-                        <td style={{ padding: "8px" }}>
-                          <span style={{ color: match.venue === "Local" ? colors.blue : colors.muted, fontWeight: match.venue === "Local" ? "bold" : "normal" }}>{match.homeTeam}</span>
-                          {" "}{match.homeGoals} - {match.awayGoals}{" "}
-                          <span style={{ color: match.venue === "Visitante" ? colors.blue : colors.muted, fontWeight: match.venue === "Visitante" ? "bold" : "normal" }}>{match.awayTeam}</span>
-                        </td>
-                        <td style={{ padding: "8px", color: match.result === "G" ? colors.green : match.result === "E" ? colors.amber : colors.red, fontWeight: "bold" }}>
+                        <td style={{ padding: "8px" }}>{match.country || "—"}</td>
+                        <td style={{ padding: "8px" }}>{match.competition || "—"}</td>
+                        <td style={{ padding: "8px" }}>{match.season || "—"}</td>
+                        <td style={{ padding: "8px" }}>{match.referee}</td>
+                        <td style={{ padding: "8px", color: match.venue === "Local" ? colors.blue : colors.muted, fontWeight: match.venue === "Local" ? "bold" : "normal" }}>{match.homeTeam || "—"}</td>
+                        <td style={{ padding: "8px", whiteSpace: "nowrap" }}>{match.homeGoals} - {match.awayGoals}</td>
+                        <td style={{ padding: "8px", color: match.venue === "Visitante" ? colors.blue : colors.muted, fontWeight: match.venue === "Visitante" ? "bold" : "normal" }}>{match.awayTeam || "—"}</td>
+                        <td style={{ padding: "8px", textAlign: "center" }}>{match.fullTimeResult}</td>
+                        <td style={{ padding: "8px", textAlign: "center" }}>{match.fouls ?? "—"}</td>
+                        <td style={{ padding: "8px", textAlign: "center" }}>{match.cards ?? "—"}</td>
+                        <td style={{ padding: "8px", textAlign: "center" }}>{match.reds ?? "—"}</td>
+                        <td style={{ padding: "8px", textAlign: "center" }}>{match.penalties ?? "—"}</td>
+                        <td style={{ padding: "8px", color: match.result === "G" ? colors.green : match.result === "E" ? colors.amber : colors.red, fontWeight: "bold", whiteSpace: "nowrap" }}>
                           {match.result === "G" ? "Ganó" : match.result === "E" ? "Empató" : "Perdió"}
                         </td>
-                        <td style={{ padding: "8px" }}>{match.competition}</td>
-                        <td style={{ padding: "8px" }}>{match.season}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -303,7 +308,7 @@ export default function RefereesPage() {
         )}
 
         <aside style={{ marginTop: "12px", padding: "10px 12px", color: colors.muted, background: colors.surfaceAlt, border: `1px solid ${colors.border}`, lineHeight: 1.5 }}>
-          <strong style={{ color: colors.text }}>Cobertura actual:</strong> Liga Profesional, temporadas históricas disponibles en el archivo (2016–2025). Copa Argentina todavía no está incluida.
+          <strong style={{ color: colors.text }}>Cobertura actual:</strong> partidos de Argentina incluidos en la base CSV, temporadas 2007–2026. Las estadísticas no informadas aparecen como “—”.
           <div style={{ marginTop: "4px" }}>Partidos disponibles en la base: {options.matchCount.toLocaleString("es-AR")}.</div>
         </aside>
       </div>

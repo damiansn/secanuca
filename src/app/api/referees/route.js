@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import Redis from "ioredis";
-import { REFEREE_MATCHES_REDIS_KEY, toRefereeMatch } from "../../../lib/referee-matches.js";
+import {
+  REFEREE_MATCHES_REDIS_KEY,
+  refereeMatchIdentity,
+  toRefereeMatch,
+} from "../../../lib/referee-matches.js";
 
-const DATA_FILES = [
-  "referee-matches-history.csv",
-  "referee-matches-current.csv",
-];
+const DATA_FILE = "referee-matches.csv";
 
 const redis = new Redis(process.env.REDIS_URL);
 let csvMatchesPromise;
@@ -65,21 +66,18 @@ function normalize(value) {
 
 async function loadCsvMatches() {
   if (!csvMatchesPromise) {
-    csvMatchesPromise = Promise.all(
-      DATA_FILES.map(file => readFile(path.join(process.cwd(), "src", "data", file), "utf8"))
-    ).then(contents => {
-      const byId = new Map();
-      for (const text of contents) {
-        for (const row of parseCsv(text)) {
-          const match = toRefereeMatch(row);
-          if (match) byId.set(match.id, match);
+    csvMatchesPromise = readFile(path.join(process.cwd(), "src", "data", DATA_FILE), "utf8")
+      .then(contents => {
+        const byIdentity = new Map();
+        for (const [index, row] of parseCsv(contents).entries()) {
+          const match = toRefereeMatch({ ...row, id: row.id || `csv-row-${index + 1}` });
+          if (match) byIdentity.set(refereeMatchIdentity(match), match);
         }
-      }
-      return [...byId.values()];
-    }).catch(error => {
-      csvMatchesPromise = undefined;
-      throw error;
-    });
+        return [...byIdentity.values()];
+      }).catch(error => {
+        csvMatchesPromise = undefined;
+        throw error;
+      });
   }
   return csvMatchesPromise;
 }
@@ -89,14 +87,14 @@ async function loadMatches() {
     loadCsvMatches(),
     redis.hvals(REFEREE_MATCHES_REDIS_KEY),
   ]);
-  const byId = new Map(csvMatches.map(match => [match.id, match]));
+  const byIdentity = new Map(csvMatches.map(match => [refereeMatchIdentity(match), match]));
 
   for (const value of storedMatches) {
     const match = toRefereeMatch(JSON.parse(value));
-    if (match) byId.set(match.id, match);
+    if (match) byIdentity.set(refereeMatchIdentity(match), match);
   }
 
-  return [...byId.values()];
+  return [...byIdentity.values()];
 }
 
 export async function GET(request) {
@@ -119,7 +117,8 @@ export async function GET(request) {
           referee,
           [...new Set(matches
             .filter(match => normalize(match.referee) === normalize(referee))
-            .flatMap(match => [match.homeTeam, match.awayTeam]))].sort((a, b) => a.localeCompare(b, "es")),
+            .flatMap(match => [match.homeTeam, match.awayTeam])
+            .filter(Boolean))].sort((a, b) => a.localeCompare(b, "es")),
         ])),
       });
     }
