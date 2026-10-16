@@ -273,20 +273,27 @@ export default function RefereesPage() {
               <div style={{ marginTop: "8px", padding: "16px", textAlign: "center", color: colors.muted, background: colors.surface, border: `1px solid ${colors.border}` }}>No hay partidos en esta combinación para el período seleccionado.</div>
             ) : (
               <div style={{ marginTop: "8px", overflowX: "auto", background: colors.surface, border: `1px solid ${colors.border}` }}>
-                <table style={{ minWidth: "1120px", borderCollapse: "collapse" }}>
+                <table style={{ minWidth: "980px", borderCollapse: "collapse" }}>
                   <thead>
                     <tr style={{ color: colors.muted, background: colors.surfaceAlt, textAlign: "left" }}>
-                      {["Fecha", "País", "Liga", "Temporada", "Árbitro", "Local", "Goles", "Visitante", "FTR", "Faltas", "Amarillas", "Rojas", "Penales", "Resultado del equipo"].map(label => <th key={label} style={{ padding: "8px", borderBottom: `1px solid ${colors.border}`, whiteSpace: "nowrap" }}>{label}</th>)}
+                      {["Fecha", "Liga", "Temporada", "Local", "Goles", "Visitante", "FTR", "Faltas", "Amarillas", "Rojas", "Penales", "Resultado del equipo"].map(label => (
+                        <th key={label} style={{ padding: "8px", borderBottom: `1px solid ${colors.border}`, whiteSpace: "nowrap" }}>
+                          {label === "Amarillas" || label === "Rojas" ? (
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                              <span aria-hidden="true" style={{ display: "inline-block", width: "8px", height: "11px", borderRadius: "1px", background: label === "Amarillas" ? "#facc15" : colors.red }} />
+                              {label}
+                            </span>
+                          ) : label}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
                     {stats.matches.map(match => (
                       <tr key={match.id} style={{ borderBottom: `1px solid ${colors.borderSub}` }}>
                         <td style={{ padding: "8px", whiteSpace: "nowrap" }}>{match.date}</td>
-                        <td style={{ padding: "8px" }}>{match.country || "—"}</td>
                         <td style={{ padding: "8px" }}>{match.competition || "—"}</td>
                         <td style={{ padding: "8px" }}>{match.season || "—"}</td>
-                        <td style={{ padding: "8px" }}>{match.referee}</td>
                         <td style={{ padding: "8px", color: match.venue === "Local" ? colors.blue : colors.muted, fontWeight: match.venue === "Local" ? "bold" : "normal" }}>{match.homeTeam || "—"}</td>
                         <td style={{ padding: "8px", whiteSpace: "nowrap" }}>{match.homeGoals} - {match.awayGoals}</td>
                         <td style={{ padding: "8px", color: match.venue === "Visitante" ? colors.blue : colors.muted, fontWeight: match.venue === "Visitante" ? "bold" : "normal" }}>{match.awayTeam || "—"}</td>
