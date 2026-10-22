@@ -279,7 +279,7 @@ bdd: "villarreal",
 
 jifi:"ae-prat",
 bha:"albacete-balompie",
-jcfg:"andorra",
+jcfg:"fc-andorra",
 biaeb:"antequera-cf",
 eefdg:"antoniano",
 bibcc:"arenas-de-getxo",
