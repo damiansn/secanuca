@@ -398,18 +398,26 @@ bhjcd:"utebo-fc",
 bhjei:"valle-de-egues",
 edihe:"yuncos",
 
-
-
-
-
-
-
-
-
-
-
-
-
+jcfd:"coruxo-fc",
+bif:"zamora",
+bhj:"real-union",
+babfc:"pena-sport-fc",
+bhjfc:"cd-pamplona",
+fdifi:"tarancon",
+bib:"alcoyano",
+cbjec:"cd-badajoz",
+gbid:"puertollano",
+biahd:"trival-valderas",
+jcgc:"sd-amorebieta",
+hhjfa:"mijas-las-lagunas",
+bibfj:"cd-covadonga",
+igdeg:"reus-fc-reddis",
+bhjjc:"deportiva-minera",
+jcea:"gimnastica-torrelavega",
+fffha:"ud-ourense",
+biafd:"salamanca-uds",
+bhb:"xerez",
+:"tavernes"
 
 // ---- Premier League (Inglaterra) ----
 
