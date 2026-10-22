@@ -417,7 +417,7 @@ jcea:"gimnastica-torrelavega",
 fffha:"ud-ourense",
 biafd:"salamanca-uds",
 bhb:"xerez",
-:"tavernes"
+jiahb:"tavernes",
 
 // ---- Premier League (Inglaterra) ----
 
