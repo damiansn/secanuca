@@ -562,7 +562,7 @@ bbbgd: "viseu",
 
   // ---- Liga de Primera  (Chile) ----
   bcdj:  "colo-colo",
-  bcef:  "u-catolica",
+  bcef:  "u-catolica", 
   ifeb:  "universidad-de-chile",
   bcda:  "everton-de-vina",
   bcdi:  "palestino",
