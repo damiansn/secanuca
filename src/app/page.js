@@ -176,6 +176,8 @@ const ESCUDOS_POR_ID = {
   ghjfa: "platense",
   ghjfb: "colon",
   ijeji: "ferro-carril-oeste",
+
+  
   // ---- MLS ----
   fbbcg: "nashville-sc",
   bddh:  "new-england-revolution",
@@ -812,7 +814,47 @@ bbbgd: "viseu",
   xxxx: "mauricio",
   xxxx: "namibia",
   xxxx: "reunion",
-  xxxx: "seychelles"
+  xxxx: "seychelles",
+
+
+  //Champions League
+
+  jef: "galatasaray",
+  bace:"aek-athens",
+  bjhi:"bodoe-glimt",
+  gjb:"feyenoord",
+  jeg:"fenerbahce",
+  bhed:"lask-linz",
+  facab:"sabah",
+  bjff:"shakhtar-donetsk",
+  bhij:"slavia-prague",
+  bjia:"viking",
+  cbbc:"slovan-bratislava",
+  bbgj:"brugge",
+
+
+  //UEFA Europa League
+bcae: "st-gilloise",
+bhjg: "viktoria-plzen",
+jcb: "torreense",
+bheb: "sturm-graz",
+bhii: "sparta-praga",
+bhdj:"salzburgo",
+ccgc: "omonia",
+bacd: "olympiacos",
+badc: "ofi",
+cdef:"celje",
+haa:"nec",
+bjif:"lillestrom",
+cchh:"levski-sofia",
+ccbb: "lech-poznan",
+ccca: "jagiellonia",
+fhj: "hapoel-beer-sheva",
+gaca: "ferencvaros",
+eiihj: "ararat-armenia",
+ccef: "zagreb",
+hfe: "celtic",
+jeh: "besiktas",
 
 
 };
