@@ -834,28 +834,191 @@ bbbgd: "viseu",
 
 
   //UEFA Europa League
-bcae: "st-gilloise",
-bhjg: "viktoria-plzen",
-jcb: "torreense",
-bheb: "sturm-graz",
-bhii: "sparta-praga",
-bhdj:"salzburgo",
-ccgc: "omonia",
-bacd: "olympiacos",
-badc: "ofi",
-cdef:"celje",
-haa:"nec",
-bjif:"lillestrom",
-cchh:"levski-sofia",
-ccbb: "lech-poznan",
-ccca: "jagiellonia",
-fhj: "hapoel-beer-sheva",
-gaca: "ferencvaros",
-eiihj: "ararat-armenia",
-ccef: "zagreb",
-hfe: "celtic",
-jeh: "besiktas",
+bcae: "st-gilloise",        //belgica
+bhjg: "viktoria-plzen",     //republica checa
+jcb: "torreense",           //portugal
+bheb: "sturm-graz",         //austria
+bhii: "sparta-praga",       //republica checa
+bhdj:"salzburgo",           //austria
+ccgc: "omonia",             //chipre
+bacd: "olympiacos",         //grecia
+badc: "ofi",              //grecia
+cdef:"celje",             //eslovenia
+haa:"nec",                // paises bajos
+bjif:"lillestrom",        //noruega
+cchh:"levski-sofia",       //bulgaria
+ccbb: "lech-poznan",       //polonia
+ccca: "jagiellonia",       //polonia
+fhj: "hapoel-beer-sheva", //israel
+gaca: "ferencvaros",      //hungria
+eiihj: "ararat-armenia", //armenia
+ccef: "zagreb",      //croacia
+hfe: "celtic",       //escocia
+jeh: "besiktas",    //turquia
+gjj: "az-alkmaar",  // paises bajos
+bbhd: "anderlecht", //belgica
 
+//UEFA Conference League
+
+bidb:"aarhus", // dinamarca
+hbcei:"virtus", // san marino
+cche:"aek-larnaca", // chipre
+hhjdh:"af-elbasani", // albania
+gja:"ajax", // países bajos
+bedih:"alashkert-martuni", // armenia
+ccgd:"apollon-limassol", // chipre
+bahif:"astana", // kazajistán
+chhfb:"atert-bissen", // luxemburgo
+egfbj:"as-descaldes", // andorra
+bbcdb:"auda", // letonia
+bhea:"austria-wien", // austria
+jfi:"başakşehir", // turquía
+feeb:"bate", // bielorrusia
+ffj:"beitar-jerusalem", // israel
+idg:"bohemians", // irlanda
+hfci:"borac-banjaluka", // bosnia y herzegovina
+bjic:"brann", // noruega
+eigdc:"bravo", // eslovenia
+bebdb:"caernarfon", // gales
+caea:"cfr-cluj", // rumania
+badia:"coleraine-fc", // irlanda del norte
+caei:"fc-u-craiova-1948", // rumania
+cchg:"cska-sofia", // bulgaria
+cbbj:"dac-1904", // eslovaquia
+cage:"debreceni-vsc", // hungría
+bebbd:"decic", // montenegro
+iea:"derry-city", // irlanda
+hfdd:"differdange-03", // luxemburgo
+jddg:"dila", // georgia
+ffid:"dinamo-city", // albania
+bjfg:"dinamo-kiev", // ucrania
+fecg:"dinamo-minsk", // bielorrusia
+feci:"dinamo-tbilisi", // georgia
+efadd:"drita", // kosovo
+egaai:"dukagjini", // kosovo
+ijfh:"estrella-roja", // serbia
+cagf:"eto-fc-győr", // hungría
+bgaeb:"europa-fc", // gibraltar
+bice:"fc-copenhague", // dinamarca
+cbdba:"hegelmann", // lituania
+bedja:"fc-iberia-1999", // georgia
+cdeh:"fc-koper", // eslovenia
+bbff:"lugano", // suiza
+bicd:"fc-midtjylland", // dinamarca
+hbcee:"fc-ml-vitebsk", // bielorrusia
+bich:"fc-nordsjaelland", // dinamarca
+bbef:"fc-sion", // suiza
+bbeg:"fc-st.-gallen", // suiza
+bbeh:"fc-thun", // suiza
+cejic:"fc-una-strassen", // luxemburgo
+bbei:"fc-vaduz", // liechtenstein
+caeb:"fcsb", // rumania
+fjea:"fiori", // san marino
+biaa:"jablonec", // república checa
+ccicg:"liepāja", // letonia
+bfcaf:"panevėžys", // lituania
+fjhh:"fk-sarajevo", // bosnia y herzegovina
+cdbj:"žalgiris", // lituania
+feef:"flora", // estonia
+ieij:"floriana", // malta
+bijg:"gais", // suecia
+bdfih:"gap-connah's-quay", // gales
+ccdd:"gks-katowice", // polonia
+feed:"glentoran", // irlanda del norte
+ccbe:"gornik-zabrze", // polonia
+bijf:"hammarby", // suecia
+bejij:"hamrun-spartans", // malta
+fgh:"hapoel-tel-aviv", // israel
+cabgb:"hb", // islas feroe
+hfj:"hearts", // escocia
+hfh:"hibernian", // escocia
+bjcf:"hjk", // finlandia
+ccej:"hajduk-split", // croacia
+ccei:"rijeka", // croacia
+biaj:"hradec-kralove", // república checa
+biii:"ifk-göteborg", // suecia
+baffd:"ilves", // finlandia
+gjbd:"inter-escaldes", // andorra
+bjcd:"inter-turku", // finlandia
+bbhe:"gent", // bélgica
+bafge:"kairat-almaty", // kazajistán
+fjda:"kalju-nomme", // estonia
+cjhbg:"kauno-zalgiris", // lituania
+caf:"kf-ballkani", // kosovo
+ejhhd:"kf-egnatia", // albania
+fhefa:"malisheva", // kosovo
+ieig:"skendija-79", // macedonia del norte
+bjcga:"kí", // islas feroe
+bjdf:"kups", // finlandia
+bhaei:"larne-fc", // irlanda del norte
+bhaei:"learne-fc", // irlanda del norte
+feee:"levadia", // estonia
+bgadh:"lincoln-red-imps", // gibraltar
+ffje:"linfield", // irlanda del norte
+giihf:"lnz-cherkasy", // ucrania
+ifci:"ludogorets", // bulgaria
+fgg:"maccabi-tel-aviv", // israel
+fgeh:"marsaxlokk", // malta
+iefg:"milsami", // moldavia
+bjag:"mjällby-aif", // suecia
+cehge:"mondorf", // luxemburgo
+bcjhd:"mornar", // montenegro
+hff:"motherwell", // escocia
+cbai:"msk-zilina", // eslovaquia
+fecf:"neftchi-baku", // azerbaiyán
+jdgi:"nk-aluminij", // Eslovenia
+iefd:"nk-varazdin", // Croacia
+fgjdd:"noah", // Armenia
+ffjf:"nsi-runavik", // Islas Feroe
+cchd:"pafos-fc", // Chipre
+bcjhh:"paide", // Estonia
+cahc:"paksi", // Hungría
+bacc:"panathinaikos", // Grecia
+bacj:"paok", // Grecia
+fedh:"partizan", // Serbia
+bebfc:"penybont", // Gales
+cbieh:"petrocub", // Moldavia
+bedgg:"petrovac", // Montenegro
+eiibi:"polissya", // Ucrania
+ffjc:"pyunik", // Armenia
+hfcb:"fk-qarabag", // Azerbaiyán
+bdafi:"rakow-czestochowa", // Polonia
+hfd:"rangers", // Escocia
+bhdi:"sk-rapid", // Austria
+cjdgc:"riga", // Letonia
+ceiab:"rfs", // Letonia
+ffif:"santa-coloma", // Andorra
+idi:"shamrock", // Irlanda
+iej:"shelbourne", // Irlanda
+ffic:"sheriff", // Moldavia
+bciid:"sileks", // Macedonia del Norte
+jdcf:"sp-la-fiorita", // San Marino
+cbba:"spartak-trnava", // Eslovaquia
+bgaee:"st-josephs", // Gibraltar
+fjce:"stjarnan", // Islandia
+bbif:"stvv", // Bélgica
+fjde:"sutjeska-niksic", // Montenegro
+fgfc:"the-new-saints", // Gales
+fgdc:"tobol", // Kazajistán
+jdca:"torpedo-kutaisi", // Georgia
+jfa:"trabzonspor", // Turquía
+bjhj:"tromso", // Noruega
+gjg:"twente", // Países Bajos
+cafh:"cluj", // Rumania
+ffja:"valletta-fc", // Malta
+cbaa:"valur", // Islandia
+jddh:"vardar", // Macedonia del Norte
+bdbbf:"velez-mostar", // Bosnia y Herzegovina
+cjgbd:"vestri", // Islandia
+cbad:"vikingur", // Islandia
+bchga:"vikingur-gota", // Islas Feroe
+fgeg:"vllaznia", // Albania
+feeh:"vojvodina", // Serbia
+hdjic:"yelimay-semey", // Kazajistán
+ghbcd:"zeleznicar-pancevo", // Serbia
+fjdb:"zimbru-chisinau", // Moldavia
+ccdfb:"zira", // Azerbaiyán
+fgfa:"zrinjski", // Bosnia y Herzegovina
 
 };
 
