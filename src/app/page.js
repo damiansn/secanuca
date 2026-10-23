@@ -397,7 +397,6 @@ bibfe:"ud-langreo",
 bhjcd:"utebo-fc",
 bhjei:"valle-de-egues",
 edihe:"yuncos",
-
 jcfd:"coruxo-fc",
 bif:"zamora",
 bhj:"real-union",
@@ -418,6 +417,15 @@ fffha:"ud-ourense",
 biafd:"salamanca-uds",
 bhb:"xerez",
 jiahb:"tavernes",
+eaccb:"san-sebastian-de-los-reyes",
+bhjgh:"cd-coria",
+bhjdc:"cd-varea",
+bibeg:"sd-laredo",
+jcfb:"cd-guijuelo",
+bjj:"conquense",
+jhged:"auriense",
+jiagj:"sporting-hortaleza",
+bgc:"unionistas-de-salamanca",
 
 // ---- Premier League (Inglaterra) ----
 
