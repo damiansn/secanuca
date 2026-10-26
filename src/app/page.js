@@ -475,6 +475,8 @@ cdf: "torino",
 ccj: "udinese",
 dai: "venezia",
 
+cdd:"palermo",
+
 
 // ---- Ligue 1 (Francia) ----
 
@@ -741,6 +743,7 @@ bbbgd: "viseu",
   bbijh: "claypole",
   bdgjd: "fenix",
   bedhh: "muniz",
+  hjbeh:"defensores-de-glew",
 
 // ---- Brasileirao (Brasil) ----
   bcbf:  "flamengo",
@@ -856,6 +859,9 @@ bbbgd: "viseu",
   faec:  "azerbaijan",
   faeg:  "liechtenstein",
   eiggccc:  "rusia",
+
+//--OTROS EUROPA---
+  cihfa:"pais-vasco",
 
     // ---- CONMEBOL ----
   fahd:  "uruguay",
@@ -1033,6 +1039,7 @@ bbbgd: "viseu",
   bjia:"viking",
   cbbc:"slovan-bratislava",
   bbgj:"brugge",
+  hcf:"psv-eindhoven",
 
 
   //UEFA Europa League
