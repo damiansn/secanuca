@@ -52,13 +52,60 @@ function normalizeIdPart(value) {
     .replace(/^-|-$/g, "");
 }
 
+const TEAM_ALIASES = new Map([
+  ["river", "River Plate"],
+  ["riverplate", "River Plate"],
+  ["boca", "Boca Juniors"],
+  ["bocajuniors", "Boca Juniors"],
+  ["independiente", "Independiente"],
+  ["racing", "Racing Club"],
+  ["racingclub", "Racing Club"],
+  ["sanlorenzo", "San Lorenzo"],
+  ["lanus", "Lanús"],
+  ["estudiantes", "Estudiantes de La Plata"],
+  ["estudiantesdelaplata", "Estudiantes de La Plata"],
+  ["huracan", "Huracán"],
+  ["argentinos", "Argentinos Juniors"],
+  ["argentinosjuniors", "Argentinos Juniors"],
+  ["talleres", "Talleres"],
+  ["tallerescordoba", "Talleres"],
+  ["union", "Unión"],
+  ["unionsantaafe", "Unión"],
+  ["sarmiento", "Sarmiento"],
+  ["sarmientodejunin", "Sarmiento"],
+  ["rosariocentral", "Rosario Central"],
+  ["aldosivi", "Aldosivi"],
+  ["defensayjusticia", "Defensa y Justicia"],
+  ["velez", "Vélez Sarsfield"],
+  ["velezsarsfield", "Vélez Sarsfield"],
+  ["newells", "Newell's Old Boys"],
+  ["newellsoldboys", "Newell's Old Boys"],
+  ["riestra", "Deportivo Riestra"],
+  ["deportivoriestra", "Deportivo Riestra"],
+  ["centralcordoba", "Central Córdoba"],
+  ["centralcordobasantiago", "Central Córdoba"],
+  ["independientemendoza", "Independiente Rivadavia"],
+  ["independienterivadavia", "Independiente Rivadavia"],
+  ["atletico", "Atlético Tucumán"],
+  ["atleticotucuman", "Atlético Tucumán"],
+  ["gimnasiamendoza", "Gimnasia Mendoza"],
+  ["estudiantesriocuarto", "Estudiantes Río Cuarto"],
+  ["barracas", "Barracas Central"],
+  ["barracascentral", "Barracas Central"],
+]);
+
+export function canonicalizeTeamName(value) {
+  const team = String(value || "").trim();
+  return TEAM_ALIASES.get(normalizeIdPart(team)) || team;
+}
+
 export function refereeMatchIdentity(match) {
   if (!match.homeTeam || !match.awayTeam) return match.id;
   return [
     match.date,
     match.country,
-    match.homeTeam,
-    match.awayTeam,
+    canonicalizeTeamName(match.homeTeam),
+    canonicalizeTeamName(match.awayTeam),
   ].map(normalizeIdPart).join("|");
 }
 
@@ -66,8 +113,8 @@ export function toRefereeMatch(row) {
   const dateValue = getValue(row, "Date", "matchDate", "date");
   const parsedDate = parseMatchDate(dateValue);
   const referee = String(getValue(row, "Referee", "referee") || "").trim();
-  const homeTeam = String(getValue(row, "HomeTeam", "homeTeam") || "").trim();
-  const awayTeam = String(getValue(row, "AwayTeam", "awayTeam") || "").trim();
+  const homeTeam = canonicalizeTeamName(getValue(row, "HomeTeam", "homeTeam"));
+  const awayTeam = canonicalizeTeamName(getValue(row, "AwayTeam", "awayTeam"));
   const homeGoals = parseInteger(getValue(row, "FTHG"));
   const awayGoals = parseInteger(getValue(row, "FTAG"));
 

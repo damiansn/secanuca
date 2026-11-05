@@ -38,6 +38,8 @@ El sincronizador `sync-promiedos.js` escribe los datos que consume la aplicació
 
 El historial por árbitro parte de `src/data/referee-matches.csv`, con las columnas `Date`, `Country`, `League`, `Season`, `HomeTeam`, `AwayTeam`, `Referee`, `FTHG`, `FTAG`, `FTR`, `Fouls`, `Cards`, `Reds` y `Penalties`. Los partidos finalizados de Liga Profesional se incorporan automáticamente durante la sincronización (cada cinco minutos) y se guardan sin vencimiento en Redis, identificados por el ID de Promiedos para evitar duplicados. La interfaz consulta ambas fuentes. Para que un partido nuevo figure, Promiedos debe proporcionar su resultado y árbitro en el detalle del partido.
 
+Los nombres de equipos del CSV y de los partidos nuevos se canonicalizan antes de unir las fuentes (por ejemplo, `River` y `River Plate` se muestran y consultan como el mismo equipo).
+
 ## Despliegue
 
 La aplicación web puede desplegarse en Vercel. Configurá `REDIS_URL` como variable de entorno del proyecto para que las rutas de API puedan leer los datos sincronizados.
