@@ -115,6 +115,7 @@ export default function TeamSearch() {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [fixtures, setFixtures] = useState([]);
   const [loadingFixtures, setLoadingFixtures] = useState(false);
+  const [fixtureStatus, setFixtureStatus] = useState("");
   const [teamListError, setTeamListError] = useState("");
   const [error, setError] = useState("");
 
@@ -151,6 +152,7 @@ export default function TeamSearch() {
     setSelectedTeam(team);
     setQuery(team.name || team.nombre || "");
     setFixtures([]);
+    setFixtureStatus("");
     setLoadingFixtures(true);
     setError("");
     try {
@@ -167,6 +169,7 @@ export default function TeamSearch() {
             : null;
       if (!nextFixtures) throw new Error("El fixture recibido no tiene un formato válido.");
       setFixtures(nextFixtures);
+      setFixtureStatus(result.status || (nextFixtures.length > 0 ? "ok" : "empty"));
     } catch (requestError) {
       setError(requestError.message || "Error al cargar el fixture.");
     } finally {
@@ -178,6 +181,7 @@ export default function TeamSearch() {
     setSelectedTeam(null);
     setQuery("");
     setFixtures([]);
+    setFixtureStatus("");
     setError("");
   }
 
@@ -190,6 +194,7 @@ export default function TeamSearch() {
           setQuery(event.target.value);
           setSelectedTeam(null);
           setFixtures([]);
+          setFixtureStatus("");
           setError("");
         }}
         onKeyDown={event => {
@@ -197,11 +202,12 @@ export default function TeamSearch() {
             setQuery("");
             setSelectedTeam(null);
             setFixtures([]);
+            setFixtureStatus("");
             setError("");
           }
         }}
-        placeholder="Buscar equipo..."
-        aria-label="Buscar equipo"
+        placeholder="¿Cuándo juega tu equipo?"
+        aria-label="Buscar fixture de equipo"
         aria-controls={query.trim() || error || teamListError ? "team-search-panel" : undefined}
         style={styles.input}
       />
@@ -238,7 +244,11 @@ export default function TeamSearch() {
               {loadingFixtures ? (
                 <div style={{ padding: 12, color: "#94a3b8" }}>Cargando fixture...</div>
               ) : fixtures.length === 0 ? (
-                <div style={{ padding: 12, color: "#94a3b8" }}>Sin próximos partidos.</div>
+                <div style={{ padding: 12, color: "#94a3b8" }}>
+                  {fixtureStatus === "unavailable"
+                    ? "El fixture todavía no está disponible. Intentá nuevamente más tarde."
+                    : "No hay próximos partidos cargados para este equipo."}
+                </div>
               ) : (
                 fixtures.map((fixture, index) => {
                   const homeAway = obtenerCondicion(fixture);

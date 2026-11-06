@@ -335,6 +335,7 @@ export async function GET(request) {
         fixtures: [],
         nextDateParam: null,
         source: "redis",
+        status: "unavailable",
       });
     }
 
@@ -381,6 +382,7 @@ export async function GET(request) {
       fixtures,
       nextDateParam: null,
       source: "redis",
+      status: fixtures.length > 0 ? "ok" : "empty",
     });
   } catch (error) {
     console.error(

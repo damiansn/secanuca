@@ -26,7 +26,7 @@ export default function AppNavbar({ activeCompetition = "" }) {
             className={`app-navbar-referees${refereeIsActive ? " app-navbar-referees-active" : ""}`}
             aria-current={refereeIsActive ? "page" : undefined}
           >
-            ÁRBITROS
+            HISTORIAL ARBITRAL
           </Link>
         </div>
       </div>

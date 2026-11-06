@@ -1909,6 +1909,17 @@ export default function Home() {
   const [matchStats, setMatchStats] = useState(null);
   const [matchStatsLoading, setMatchStatsLoading] = useState(false);
   const [matchStatsError, setMatchStatsError] = useState("");
+  const [ligasOcultas, setLigasOcultas] = useState(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      const saved = JSON.parse(window.localStorage.getItem("secanuca:ligas-ocultas") || "[]");
+      return new Set(Array.isArray(saved) ? saved : []);
+    } catch (storageError) {
+      console.warn("No se pudieron restaurar los filtros de ligas:", storageError);
+      return new Set();
+    }
+  });
+  const [filtrosLigasAbiertos, setFiltrosLigasAbiertos] = useState(false);
   const formacionesPartido = extraerFormacionesPartido(matchStats);
   const hayDatosFormaciones = Array.isArray(matchStats?.lineups) || Array.isArray(matchStats?.lineup) || Boolean(matchStats?.players?.lineups || matchStats?.lineups || matchStats?.lineup || matchStats?.formation || matchStats?.starting_xi) || formacionesPartido.length > 0;
 
@@ -1988,22 +1999,46 @@ export default function Home() {
     return `${dd}/${mm}/${yyyy}`;
   }
 
-  async function cargarPartidos() {
+  useEffect(() => {
     try {
-      setError("");
-      const res = await fetch(`/api/matches?date=${date}`, { cache: "no-store" });
-      if (!res.ok) throw new Error("No se pudieron cargar los partidos.");
-      const json = await res.json();
-      setData(Array.isArray(json) ? json : []);
-    } catch (err) {
-      setError(err.message || "Error cargando partidos.");
-    } finally {
-      setLoading(false);
+      window.localStorage.setItem("secanuca:ligas-ocultas", JSON.stringify([...ligasOcultas]));
+    } catch (storageError) {
+      console.warn("No se pudieron guardar los filtros de ligas:", storageError);
     }
-  }
+  }, [ligasOcultas]);
 
-  useEffect(() => { setLoading(true); cargarPartidos(); }, [date]);
-  useEffect(() => { const t = setInterval(cargarPartidos, 30000); return () => clearInterval(t); }, [date]);
+  useEffect(() => {
+    const controller = new AbortController();
+    let solicitudEnCurso = false;
+
+    async function cargarPartidos() {
+      if (solicitudEnCurso) return;
+      solicitudEnCurso = true;
+      setLoading(true);
+      try {
+        setError("");
+        const res = await fetch(`/api/matches?date=${date}`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || "No se pudieron cargar los partidos.");
+        if (!controller.signal.aborted) setData(Array.isArray(json) ? json : []);
+      } catch (err) {
+        if (!controller.signal.aborted) setError(err.message || "Error cargando partidos.");
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+        solicitudEnCurso = false;
+      }
+    }
+
+    cargarPartidos();
+    const interval = setInterval(cargarPartidos, 30000);
+    return () => {
+      controller.abort();
+      clearInterval(interval);
+    };
+  }, [date]);
 
   useEffect(() => {
     if (!selectedMatch) return undefined;
@@ -2060,12 +2095,14 @@ export default function Home() {
     [data]
   );
 
-  // Set de ligas ocultas (clave = key||id||index)
-  const [ligasOcultas, setLigasOcultas] = useState(new Set());
-  const [filtrosLigasAbiertos, setFiltrosLigasAbiertos] = useState(false);
+  function claveLiga(league, index) {
+    return obtenerCompetition(league) || league?.key || league?.id || String(index);
+  }
 
-  // Resetear filtros cuando cambia la fecha
-  useEffect(() => { setLigasOcultas(new Set()); }, [date]);
+  const ligasVisibles = useMemo(
+    () => ligasConPartidos.filter((league, index) => !ligasOcultas.has(claveLiga(league, index))),
+    [ligasConPartidos, ligasOcultas]
+  );
 
   function toggleLiga(key) {
     setLigasOcultas(prev => {
@@ -2077,8 +2114,12 @@ export default function Home() {
 
   function ocultarTodasLasLigas() {
     setLigasOcultas(new Set(
-      ligasConPartidos.map((league, index) => league?.key || league?.id || String(index))
+      ligasConPartidos.map(claveLiga)
     ));
+  }
+
+  function mostrarTodasLasLigas() {
+    setLigasOcultas(new Set());
   }
 
   return (
@@ -2135,7 +2176,7 @@ export default function Home() {
                 Filtrar ligas
               </span>
               <span className="match-league-filter-count">
-                {ligasConPartidos.length - ligasOcultas.size}/{ligasConPartidos.length} activas
+                {ligasVisibles.length}/{ligasConPartidos.length} activas
               </span>
               <svg className="match-league-filter-chevron" aria-hidden="true" viewBox="0 0 20 20">
                 <path d="m5 7.5 5 5 5-5" />
@@ -2152,8 +2193,17 @@ export default function Home() {
                 >
                   Desactivar todas
                 </button>
+                <button
+                  type="button"
+                  className="match-clear-leagues"
+                  onClick={mostrarTodasLasLigas}
+                  title="Activar todas las competencias"
+                  aria-label="Activar todas las competencias"
+                >
+                  Activar todas
+                </button>
                 {ligasConPartidos.map((league, li) => {
-                  const key = league?.key || league?.id || String(li);
+                  const key = claveLiga(league, li);
                   const nombre = normalizarNombre(league);
                   const oculta = ligasOcultas.has(key);
                   return (
@@ -2195,7 +2245,7 @@ export default function Home() {
             {data.map((league, li) => {
               const games = Array.isArray(league?.games) ? league.games : [];
               if (games.length === 0) return null;
-              const key = league?.key || league?.id || String(li);
+              const key = claveLiga(league, li);
               if (ligasOcultas.has(key)) return null;
               const comp = obtenerCompetition(league);
               const nombre = normalizarNombre(league);

@@ -219,8 +219,13 @@ export async function GET(request) {
     const competition =
       searchParams.get("competition") || "argentina";
 
-    const config =
-      COMPETENCIAS[competition] || COMPETENCIAS.argentina;
+    const config = COMPETENCIAS[competition];
+    if (!config) {
+      return NextResponse.json(
+        { error: "La competencia seleccionada no es válida." },
+        { status: 400 }
+      );
+    }
 
     console.log("==========================================");
     console.log("API STANDINGS");

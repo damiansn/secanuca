@@ -107,7 +107,13 @@ async function loadMatches() {
   const byIdentity = new Map(csvMatches.map(match => [refereeMatchIdentity(match), match]));
 
   for (const value of storedMatches) {
-    const match = toRefereeMatch(JSON.parse(value));
+    let match;
+    try {
+      match = toRefereeMatch(JSON.parse(value));
+    } catch (error) {
+      console.error("Se omitió un partido de árbitros inválido en Redis:", error);
+      continue;
+    }
     if (!match || isExcludedReferee(match.referee) || isUpdatedReferee(match.referee)) continue;
     const identity = refereeMatchIdentity(match);
     if (!byIdentity.has(identity)) byIdentity.set(identity, match);

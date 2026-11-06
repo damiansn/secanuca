@@ -106,6 +106,7 @@ export function refereeMatchIdentity(match) {
     match.country,
     canonicalizeTeamName(match.homeTeam),
     canonicalizeTeamName(match.awayTeam),
+    match.referee,
   ].map(normalizeIdPart).join("|");
 }
 
