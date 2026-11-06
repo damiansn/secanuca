@@ -2255,7 +2255,9 @@ export default function Home() {
                     <Link href={`/posiciones?competition=${comp}`} style={S.leagueHeadLink}>
                       ▶ {nombre.toUpperCase()}
                     </Link>
-                    <span style={{ fontSize: "10px", fontWeight: "normal" }}>{games.length} partidos</span>
+                    <span style={{ fontSize: "10px", fontWeight: "normal" }}>
+                      {games.length} {games.length === 1 ? "partido" : "partidos"}
+                    </span>
                   </div>
                   <table className="match-results-table" style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
                     <tbody>
