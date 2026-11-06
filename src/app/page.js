@@ -2283,6 +2283,7 @@ export default function Home() {
                         return (
                           <tr
                             key={game?.id || gi}
+                            className={`match-row${isLive ? " match-live-row" : ""}${isFinal ? " match-final-row" : ""}`}
                             onClick={puedeVerEstadisticas ? () => seleccionarPartido(game, league, estado) : undefined}
                             title={puedeVerEstadisticas ? "Seleccionar para ver estadísticas" : undefined}
                             style={{
@@ -2293,8 +2294,8 @@ export default function Home() {
                           >
                             {/* ESTADO */}
                             <td className="match-status-cell" style={{ width: "72px", minWidth: "72px", maxWidth: "72px", padding: "4px 3px", textAlign: "center", borderRight: `1px solid ${C.borderSub}`, verticalAlign: "middle" }}>
-                              {isLive && <span style={{ display: "inline-block", width: "5px", height: "5px", borderRadius: "50%", background: C.green, marginRight: "2px", verticalAlign: "middle" }} />}
-                              <span style={isLive ? S.statusLive : isFinal ? S.statusFinal : S.statusPending}>
+                              {isLive && <span className="match-live-dot" aria-hidden="true" />}
+                              <span className={isLive ? "match-status-live" : isFinal ? "match-status-final" : "match-status-pending"} style={isLive ? S.statusLive : isFinal ? S.statusFinal : S.statusPending}>
                                 {isLive ? `⚽ ${estado.texto}` : estado.texto}
                               </span>
                             </td>
@@ -2327,7 +2328,7 @@ export default function Home() {
                                   <EscudoImg team={teamA} />
                                 </div>
                                 {/* MARCADOR */}
-                                <div style={{ textAlign: "center", fontWeight: "bold", fontSize: "13px", color: isLive ? C.green : isFinal ? C.textMuted : C.white, whiteSpace: "nowrap", flexShrink: 0 }}>
+                                <div className={isLive ? "match-score-live" : "match-score"} style={{ textAlign: "center", fontWeight: "bold", fontSize: "13px", color: isLive ? C.green : isFinal ? C.textMuted : C.white, whiteSpace: "nowrap", flexShrink: 0 }}>
                                   {penales && marcadorPrincipal && marcadorPrincipal.regularA != null && marcadorPrincipal.regularB != null
                                     ? `(${marcadorPrincipal.a}) ${marcadorPrincipal.regularA} - ${marcadorPrincipal.regularB} (${marcadorPrincipal.b})`
                                     : penales && marcadorPrincipal

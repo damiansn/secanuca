@@ -348,6 +348,46 @@ input {
   vertical-align: middle;
 }
 
+.match-live-row td:first-child {
+  border-left: 3px solid #10b981;
+}
+
+.match-live-row .match-live-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 3px;
+  border-radius: 50%;
+  background: #10b981;
+  vertical-align: middle;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.12);
+  animation: match-live-pulse 2.2s ease-in-out infinite;
+}
+
+.match-live-row .match-score-live {
+  letter-spacing: 0.04em;
+}
+
+.match-final-row .match-score {
+  color: #cbd5e1 !important;
+}
+
+@keyframes match-live-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .match-live-row .match-live-dot {
+    animation: none;
+  }
+}
+
 .match-details-cell > button {
   min-width: 0;
 }
