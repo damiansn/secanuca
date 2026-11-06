@@ -1653,6 +1653,7 @@ function normalizarResultadoNumerico(valor) {
 function obtenerPenales(game) {
   const candidates = [
     ["scraped_penalty_scores", game?.scraped_penalty_scores],
+    ["penalties", game?.penalties],
     ["scores_penalties", game?.scores_penalties],
     ["scores_penalty", game?.scores_penalty],
     ["score_penalties", game?.score_penalties],
