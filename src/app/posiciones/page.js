@@ -153,11 +153,22 @@ function identificarEstadistica(column) {
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim();
-  if (/(^|[\s_/-])(pts|puntos|points)([\s_/-]|$)/.test(texto)) return "points";
-  if (/(^|[\s_/-])(pj|partidos|played|matches)([\s_/-]|$)/.test(texto)) return "played";
-  if (/(^|[\s_/-])(gf|favor|goals_for|goles a favor)([\s_/-]|$)/.test(texto) || texto === "gol") return "for";
-  if (/(^|[\s_/-])(gc|contra|goals_against|goles en contra)([\s_/-]|$)/.test(texto)) return "against";
-  if (/(^|[\s_/-])(dif|diferencia|goal_difference)([\s_/-]|$)/.test(texto)) return "difference";
+  const tokens = texto.split(/[\s_/_-]+/).filter(Boolean);
+  if (tokens.some(token => ["pts", "puntos", "points"].includes(token))) return "points";
+  if (tokens.some(token => ["pj", "partidos", "played", "matches"].includes(token))) return "played";
+  if (
+    tokens.includes("gf") ||
+    tokens.includes("favor") ||
+    texto.includes("goals_for") ||
+    texto.includes("goles a favor")
+  ) return "for";
+  if (
+    tokens.includes("gc") ||
+    tokens.includes("contra") ||
+    texto.includes("goals_against") ||
+    texto.includes("goles en contra")
+  ) return "against";
+  if (tokens.some(token => ["dif", "diferencia", "goal_difference"].includes(token))) return "difference";
   if (texto === "g" || texto.endsWith(" ganados") || texto.includes("wins")) return "wins";
   if (texto === "e" || texto.endsWith(" empatados") || texto.includes("draws")) return "draws";
   if (texto === "p" || texto.endsWith(" perdidos") || texto.includes("losses")) return "losses";
@@ -184,10 +195,10 @@ function aplicarPartidosEnVivo(table, liveGames) {
     const teams = Array.isArray(game?.teams) ? game.teams : [];
     const scores = teams.map((_, index) => obtenerScore(game?.scores?.[index]));
     if (teams.length < 2 || scores.some(score => score == null)) continue;
-    if (!teams.every(team => rowByTeam.has(String(team?.id)))) continue;
 
     teams.forEach((team, index) => {
       const teamId = String(team.id);
+      if (!rowByTeam.has(teamId)) return;
       const opponentScore = scores[index === 0 ? 1 : 0];
       const score = scores[index];
       const delta = {
