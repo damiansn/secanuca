@@ -1,12 +1,76 @@
 import puppeteer from "puppeteer";
 import Redis from "ioredis";
 import dotenv from "dotenv";
+import { appendFile, readFile } from "node:fs/promises";
+import path from "node:path";
 import { agregarPenalesScrapeados } from "./src/lib/promiedos-penalties.js";
-import { REFEREE_MATCHES_REDIS_KEY } from "./src/lib/referee-matches.js";
+import {
+  REFEREE_MATCHES_REDIS_KEY,
+  canonicalizeTeamName,
+} from "./src/lib/referee-matches.js";
 
 dotenv.config();
 
 const redis = new Redis(process.env.REDIS_URL);
+const REFEREE_MATCHES_CSV_PATH = path.join(process.cwd(), "src", "data", "referee-matches.csv");
+
+function normalizarIdentidadCsv(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function fechaParaCsv(matchDate) {
+  const match = String(matchDate || "").match(/^(\d{2})-(\d{2})-(\d{4})/);
+  if (!match) return String(matchDate || "").replace(/-/g, "/");
+  return `${match[1]}/${match[2]}/${match[3]}`;
+}
+
+function escaparCsv(value) {
+  return `"${String(value ?? "").replace(/"/g, '""')}"`;
+}
+
+async function agregarPartidoAlCsv(match) {
+  const contents = await readFile(REFEREE_MATCHES_CSV_PATH, "utf8");
+  const identity = [
+    fechaParaCsv(match.matchDate),
+    match.homeTeam,
+    match.awayTeam,
+    match.referee,
+  ].map(normalizarIdentidadCsv).join("|");
+  const yaExiste = contents.split(/\r?\n/).some(line => {
+    const fields = line.match(/"([^"]*)"/g)?.map(field => field.slice(1, -1)) || [];
+    if (fields.length < 7) return false;
+    return [
+      fields[0],
+      canonicalizeTeamName(fields[4]),
+      canonicalizeTeamName(fields[5]),
+      fields[6],
+    ].map(normalizarIdentidadCsv).join("|") === identity;
+  });
+  if (yaExiste) return false;
+
+  const row = [
+    fechaParaCsv(match.matchDate),
+    match.Country,
+    match.League,
+    match.Season,
+    match.homeTeam,
+    match.awayTeam,
+    match.referee,
+    match.FTHG,
+    match.FTAG,
+    match.FTR,
+    "",
+    "",
+    "",
+    "",
+  ].map(escaparCsv).join(",");
+  await appendFile(REFEREE_MATCHES_CSV_PATH, `\n${row}\n`, "utf8");
+  return true;
+}
 
 // ==========================================
 // CONFIGURACIÓN
@@ -541,6 +605,7 @@ async function registrarPartidosFinalizados(partidos) {
           FTR: homeGoals > awayGoals ? "H" : homeGoals < awayGoals ? "A" : "D",
         };
         await redis.hset(REFEREE_MATCHES_REDIS_KEY, id, JSON.stringify(match));
+        await agregarPartidoAlCsv(match);
         registrados += 1;
         console.log(`Partido de árbitros registrado: ${match.homeTeam} ${homeGoals}-${awayGoals} ${awayTeam} (${referee})`);
       } catch (error) {

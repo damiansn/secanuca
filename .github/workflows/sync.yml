@@ -8,7 +8,9 @@ on:
 
 jobs:
   sync:
-  
+    permissions:
+      contents: write
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout del repositorio
@@ -26,3 +28,15 @@ jobs:
         env:
           REDIS_URL: ${{ secrets.REDIS_URL }}
         run: node sync-promiedos.js
+
+      - name: Persistir nuevos partidos en el CSV
+        run: |
+          if git diff --quiet -- src/data/referee-matches.csv; then
+            echo "No hay partidos nuevos para persistir."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/referee-matches.csv
+          git commit -m "Actualizar historial de partidos por árbitro"
+          git push

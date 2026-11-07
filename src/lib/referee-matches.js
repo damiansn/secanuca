@@ -30,15 +30,6 @@ function parseMatchDate(value) {
   };
 }
 
-function parsePromiedosMatchDate(value) {
-  const date = String(value || "").trim();
-  const match = date.match(/^(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}):(\d{2}))?$/);
-  if (!match) return parseMatchDate(value);
-  return parseMatchDate(
-    `${match[2]}-${match[1]}-${match[3]}${match[4] ? ` ${match[4]}:${match[5]}` : ""}`
-  );
-}
-
 function parseInteger(value) {
   if (value === null || value === undefined || String(value).trim() === "") return null;
   const number = Number(value);
@@ -120,11 +111,8 @@ export function refereeMatchIdentity(match) {
 }
 
 export function toRefereeMatch(row) {
-  const hasPromiedosDate = row?.matchDate !== undefined && row?.matchDate !== null;
   const dateValue = getValue(row, "Date", "matchDate", "date");
-  const parsedDate = hasPromiedosDate
-    ? parsePromiedosMatchDate(dateValue)
-    : parseMatchDate(dateValue);
+  const parsedDate = parseMatchDate(dateValue);
   const referee = String(getValue(row, "Referee", "referee") || "").trim();
   const homeTeam = canonicalizeTeamName(getValue(row, "HomeTeam", "homeTeam"));
   const awayTeam = canonicalizeTeamName(getValue(row, "AwayTeam", "awayTeam"));
