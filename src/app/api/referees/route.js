@@ -4,7 +4,6 @@ import path from "node:path";
 import Redis from "ioredis";
 import {
   REFEREE_MATCHES_REDIS_KEY,
-  isFutureRefereeMatch,
   refereeMatchIdentity,
   toRefereeMatch,
 } from "../../../lib/referee-matches.js";
@@ -87,7 +86,7 @@ async function loadCsvMatches() {
         const byIdentity = new Map();
         for (const [index, row] of parseCsv(contents).entries()) {
           const match = toRefereeMatch({ ...row, id: row.id || `csv-row-${index + 1}` });
-          if (match && !isFutureRefereeMatch(match) && !isExcludedReferee(match.referee)) {
+          if (match && !isExcludedReferee(match.referee)) {
             byIdentity.set(refereeMatchIdentity(match), match);
           }
         }
@@ -115,7 +114,7 @@ async function loadMatches() {
       console.error("Se omitió un partido de árbitros inválido en Redis:", error);
       continue;
     }
-    if (!match || isFutureRefereeMatch(match) || isExcludedReferee(match.referee) || isUpdatedReferee(match.referee)) continue;
+    if (!match || isExcludedReferee(match.referee) || isUpdatedReferee(match.referee)) continue;
     const identity = refereeMatchIdentity(match);
     if (!byIdentity.has(identity)) byIdentity.set(identity, match);
   }

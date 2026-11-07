@@ -1,9 +1,5 @@
 export const REFEREE_MATCHES_REDIS_KEY = "chiquifutbol_referee_matches";
 
-export function isFutureRefereeMatch(match, now = Date.now()) {
-  return Number.isFinite(match?.timestamp) && match.timestamp > now;
-}
-
 function parseMatchDate(value) {
   const date = String(value || "").trim();
   const dayFirst = date.match(/^(\d{2})[/-](\d{2})[/-](\d{2}|\d{4})(?:\s+(\d{2}):(\d{2}))?$/);

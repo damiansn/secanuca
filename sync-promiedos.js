@@ -2,7 +2,7 @@ import puppeteer from "puppeteer";
 import Redis from "ioredis";
 import dotenv from "dotenv";
 import { agregarPenalesScrapeados } from "./src/lib/promiedos-penalties.js";
-import { REFEREE_MATCHES_REDIS_KEY, isFutureRefereeMatch, toRefereeMatch } from "./src/lib/referee-matches.js";
+import { REFEREE_MATCHES_REDIS_KEY } from "./src/lib/referee-matches.js";
 
 dotenv.config();
 
@@ -540,11 +540,6 @@ async function registrarPartidosFinalizados(partidos) {
           FTAG: String(awayGoals),
           FTR: homeGoals > awayGoals ? "H" : homeGoals < awayGoals ? "A" : "D",
         };
-        const normalizedMatch = toRefereeMatch(match);
-        if (!normalizedMatch || isFutureRefereeMatch(normalizedMatch)) {
-          throw new Error("Se rechazó un partido futuro o con fecha inválida");
-        }
-
         await redis.hset(REFEREE_MATCHES_REDIS_KEY, id, JSON.stringify(match));
         registrados += 1;
         console.log(`Partido de árbitros registrado: ${match.homeTeam} ${homeGoals}-${awayGoals} ${awayTeam} (${referee})`);
