@@ -222,6 +222,7 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url);
         const gameId = searchParams.get('game');
         const dateParam = searchParams.get('date') || 'today';
+        const liveParam = searchParams.get('live') === '1';
 
         if (gameId) {
             if (!/^[a-z0-9]{1,32}$/i.test(gameId)) {
@@ -251,6 +252,15 @@ export async function GET(request) {
         }
 
         if (dateParam === 'today' || dateParam === 'ayer' || dateParam === 'manana') {
+            if (dateParam === 'today' && liveParam) {
+                const hoy = hoyArgentina();
+                const partidos = await fetchFechaArbitraria(`${hoy.dia}-${hoy.mes}-${hoy.anio}`);
+                if (!partidos) {
+                    return NextResponse.json([], { headers: { 'Cache-Control': 'no-store' } });
+                }
+                return NextResponse.json(partidos, { headers: { 'Cache-Control': 'no-store' } });
+            }
+
             const redisKey =
                 dateParam === 'ayer'   ? 'chiquifutbol_matches_ayer' :
                 dateParam === 'manana' ? 'chiquifutbol_matches_manana' :

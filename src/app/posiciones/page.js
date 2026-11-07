@@ -108,12 +108,131 @@ function formatearFechaHora(raw) {
   return `${d}/${mo} ${String(h).padStart(2,"0")}:${m[5]}`;
 }
 
+function esPartidoEnVivo(game) {
+  if (Number(game?.status?.enum) === 2) return true;
+  const texto = [
+    game?.status?.name,
+    game?.status?.description,
+    game?.game_time_status_to_display,
+    game?.status_text,
+  ]
+    .filter(value => typeof value === "string")
+    .join(" ")
+    .toLowerCase();
+  return /\b(en vivo|live|in play)\b/.test(texto);
+}
+
+function obtenerPartidoEnVivo(teamId, liveGames) {
+  if (!teamId) return null;
+  return liveGames.find(game =>
+    Array.isArray(game?.teams) &&
+    game.teams.some(team => String(team?.id) === String(teamId))
+  ) || null;
+}
+
+function obtenerMarcadorEquipo(game, teamId) {
+  const index = game?.teams?.findIndex(team => String(team?.id) === String(teamId));
+  if (index == null || index < 0) return null;
+  const score = obtenerScore(game?.scores?.[index]);
+  return score == null ? "–" : score;
+}
+
+function identificarEstadistica(column) {
+  const texto = `${column?.key || ""} ${column?.title || ""}`
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+  if (/(^|[\s_/-])(pts|puntos|points)([\s_/-]|$)/.test(texto)) return "points";
+  if (/(^|[\s_/-])(pj|partidos|played|matches)([\s_/-]|$)/.test(texto)) return "played";
+  if (/(^|[\s_/-])(gf|favor|goals_for|goles a favor)([\s_/-]|$)/.test(texto) || texto === "gol") return "for";
+  if (/(^|[\s_/-])(gc|contra|goals_against|goles en contra)([\s_/-]|$)/.test(texto)) return "against";
+  if (/(^|[\s_/-])(dif|diferencia|goal_difference)([\s_/-]|$)/.test(texto)) return "difference";
+  if (texto === "g" || texto.endsWith(" ganados") || texto.includes("wins")) return "wins";
+  if (texto === "e" || texto.endsWith(" empatados") || texto.includes("draws")) return "draws";
+  if (texto === "p" || texto.endsWith(" perdidos") || texto.includes("losses")) return "losses";
+  return null;
+}
+
+function aplicarPartidosEnVivo(table, liveGames) {
+  const columns = Array.isArray(table?.columns) ? table.columns : [];
+  const rows = Array.isArray(table?.rows) ? table.rows : [];
+  const statisticColumns = columns
+    .map(column => ({ column, type: identificarEstadistica(column) }))
+    .filter(entry => entry.type);
+  if (statisticColumns.length === 0 || rows.length === 0) return rows;
+
+  const rowByTeam = new Map(
+    rows
+      .map(row => [row?.entity?.object?.id, row])
+      .filter(([id]) => id != null)
+      .map(([id, row]) => [String(id), row])
+  );
+  const updates = new Map();
+
+  for (const game of liveGames) {
+    const teams = Array.isArray(game?.teams) ? game.teams : [];
+    const scores = teams.map((_, index) => obtenerScore(game?.scores?.[index]));
+    if (teams.length < 2 || scores.some(score => score == null)) continue;
+    if (!teams.every(team => rowByTeam.has(String(team?.id)))) continue;
+
+    teams.forEach((team, index) => {
+      const teamId = String(team.id);
+      const opponentScore = scores[index === 0 ? 1 : 0];
+      const score = scores[index];
+      const delta = {
+        points: score > opponentScore ? 3 : score === opponentScore ? 1 : 0,
+        played: 1,
+        for: score,
+        against: opponentScore,
+        difference: score - opponentScore,
+        wins: score > opponentScore ? 1 : 0,
+        draws: score === opponentScore ? 1 : 0,
+        losses: score < opponentScore ? 1 : 0,
+      };
+      const previous = updates.get(teamId) || {};
+      Object.keys(delta).forEach(key => { previous[key] = (previous[key] || 0) + delta[key]; });
+      updates.set(teamId, previous);
+    });
+  }
+
+  const updatedRows = rows.map(row => {
+    const update = updates.get(String(row?.entity?.object?.id));
+    if (!update) return row;
+    const values = Array.isArray(row.values) ? row.values.map(value => ({ ...value })) : [];
+    statisticColumns.forEach(({ column, type }) => {
+      const value = values.find(item => item.key === column.key);
+      const number = Number(String(value?.value ?? "").replace(",", "."));
+      if (!value || !Number.isFinite(number)) return;
+      value.value = number + update[type];
+    });
+    return { ...row, values };
+  });
+
+  const pointsColumn = statisticColumns.find(({ type }) => type === "points")?.column;
+  if (!pointsColumn || updates.size === 0) return updatedRows;
+  const differenceColumn = statisticColumns.find(({ type }) => type === "difference")?.column;
+  const forColumn = statisticColumns.find(({ type }) => type === "for")?.column;
+  const valueFor = (row, column) => Number(String(
+    row?.values?.find(value => value.key === column?.key)?.value ?? ""
+  ).replace(",", "."));
+  return updatedRows
+    .map((row, index) => ({ row, index }))
+    .sort((a, b) => (
+      (valueFor(b.row, pointsColumn) || 0) - (valueFor(a.row, pointsColumn) || 0) ||
+      (differenceColumn ? (valueFor(b.row, differenceColumn) || 0) - (valueFor(a.row, differenceColumn) || 0) : 0) ||
+      (forColumn ? (valueFor(b.row, forColumn) || 0) - (valueFor(a.row, forColumn) || 0) : 0) ||
+      a.index - b.index
+    ))
+    .map(({ row }, index) => ({ ...row, num: index + 1 }));
+}
+
 // ─── TABLA DE POSICIONES ──────────────────────────────────────────────────────
 
-function TablaPosiciones({ item }) {
+function TablaPosiciones({ item, liveGames = [] }) {
   const { torneo, grupo, table } = item;
   const columns = Array.isArray(table.columns) ? table.columns : [];
-  const rows    = Array.isArray(table.rows)    ? table.rows    : [];
+  const rows    = aplicarPartidosEnVivo(table, liveGames);
 
   return (
     <div style={{ border: `1px solid ${C.border}`, background: C.surface, marginBottom: 4, overflow: "hidden" }}>
@@ -141,12 +260,23 @@ function TablaPosiciones({ item }) {
               const nombre = obtenerNombreEquipo(fila);
               const color  = obtenerColorEquipo(fila);
               const pos    = fila.num ?? i + 1;
+              const teamId = fila?.entity?.object?.id;
+              const liveGame = obtenerPartidoEnVivo(teamId, liveGames);
+              const liveScore = liveGame ? obtenerMarcadorEquipo(liveGame, teamId) : null;
               return (
                 <tr key={`${nombre}-${i}`} style={{ background: i % 2 === 0 ? C.surface : C.surfaceAlt, borderBottom: `1px solid ${C.borderSub}` }}>
                   <td style={tdCenterS}>{pos}</td>
                   <td style={{ ...tdLeftS, display: "flex", alignItems: "center", gap: 6 }}>
                     <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0, border: "1px solid rgba(255,255,255,0.1)" }} />
                     {nombre}
+                    {liveGame && (
+                      <span
+                        title="Partido en vivo"
+                        style={{ color: C.green, fontWeight: 800, marginLeft: "auto", whiteSpace: "nowrap" }}
+                      >
+                        {liveScore}
+                      </span>
+                    )}
                   </td>
                   {columns.map(c => {
                     const v = obtenerValor(fila, c.key);
@@ -442,6 +572,7 @@ function PosicionesContent() {
   const [data,    setData]    = useState(null);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState("");
+  const [liveData, setLiveData] = useState([]);
   const reqRef = useRef(0);
   const [roundFilters, setRoundFilters] = useState([]);
   const [selectedRound, setSelectedRound] = useState("");
@@ -452,24 +583,37 @@ function PosicionesContent() {
 
   useEffect(() => {
     let cancelado = false;
-    async function cargar() {
+    async function cargar(mostrarCarga = true) {
       const rid = ++reqRef.current;
       try {
-        setLoading(true); setError("");
-        const res  = await fetch(`/api/standings?competition=${encodeURIComponent(competition)}`, { cache: "no-store" });
+        if (mostrarCarga) setLoading(true);
+        setError("");
+        const [res, liveRes] = await Promise.all([
+          fetch(`/api/standings?competition=${encodeURIComponent(competition)}`, { cache: "no-store" }),
+          fetch("/api/matches?date=today&live=1", { cache: "no-store" }),
+        ]);
         if (!res.ok) throw new Error("No se pudieron obtener los datos.");
         const json = await res.json();
+        const liveJson = liveRes.ok ? await liveRes.json() : [];
         if (cancelado || rid !== reqRef.current) return;
         setData(json);
+        const partidosEnVivo = Array.isArray(liveJson)
+          ? liveJson.flatMap(league => Array.isArray(league?.games) ? league.games : [])
+          : [];
+        setLiveData(partidosEnVivo);
       } catch (err) {
         if (cancelado || rid !== reqRef.current) return;
-        setError(err?.message || "Error al cargar los datos.");
+        if (mostrarCarga) setError(err?.message || "Error al cargar los datos.");
       } finally {
-        if (!cancelado && rid === reqRef.current) setLoading(false);
+        if (mostrarCarga && !cancelado && rid === reqRef.current) setLoading(false);
       }
     }
     cargar();
-    return () => { cancelado = true; };
+    const intervalId = window.setInterval(() => cargar(false), 30000);
+    return () => {
+      cancelado = true;
+      window.clearInterval(intervalId);
+    };
   }, [competition]);
 
   useEffect(() => {
@@ -535,6 +679,13 @@ function PosicionesContent() {
   }
 
   const compConfig = COMPETENCIAS[competition] || { nombre: data?.league?.name || "Competencia", corto: "Competencia" };
+  const liveGames = [
+    ...liveData,
+    ...(Array.isArray(data?.games) ? data.games : []),
+  ].filter((game, index, games) => {
+    if (!esPartidoEnVivo(game)) return false;
+    return games.findIndex(candidate => String(candidate?.id) === String(game?.id)) === index;
+  });
 
   function obtenerTablas() {
     if (!data) return [];
@@ -662,7 +813,7 @@ function PosicionesContent() {
             <div style={sectionTitleStyle}>▶ TABLAS DE POSICIONES</div>
             <div className="standings-tables-grid">
               {tablasDestacadas.map((item, i) => (
-                <TablaPosiciones key={`${item.torneo}-${item.grupo}-${i}`} item={item} />
+                <TablaPosiciones key={`${item.torneo}-${item.grupo}-${i}`} item={item} liveGames={liveGames} />
               ))}
             </div>
           </>
@@ -771,7 +922,7 @@ function PosicionesContent() {
             </div>
             <div className="standings-tables-grid">
               {tablasRestantes.map((item, i) => (
-                <TablaPosiciones key={`${item.torneo}-${item.grupo}-${i}`} item={item} />
+                <TablaPosiciones key={`${item.torneo}-${item.grupo}-${i}`} item={item} liveGames={liveGames} />
               ))}
             </div>
           </>
