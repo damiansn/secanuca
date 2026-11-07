@@ -1,5 +1,9 @@
 export const REFEREE_MATCHES_REDIS_KEY = "chiquifutbol_referee_matches";
 
+export function isFutureRefereeMatch(match, now = Date.now()) {
+  return Number.isFinite(match?.timestamp) && match.timestamp > now;
+}
+
 function parseMatchDate(value) {
   const date = String(value || "").trim();
   const dayFirst = date.match(/^(\d{2})[/-](\d{2})[/-](\d{2}|\d{4})(?:\s+(\d{2}):(\d{2}))?$/);
@@ -28,6 +32,15 @@ function parseMatchDate(value) {
     date: `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}/${year}`,
     timestamp: parsed.getTime(),
   };
+}
+
+function parsePromiedosMatchDate(value) {
+  const date = String(value || "").trim();
+  const match = date.match(/^(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}):(\d{2}))?$/);
+  if (!match) return parseMatchDate(value);
+  return parseMatchDate(
+    `${match[2]}-${match[1]}-${match[3]}${match[4] ? ` ${match[4]}:${match[5]}` : ""}`
+  );
 }
 
 function parseInteger(value) {
@@ -111,8 +124,11 @@ export function refereeMatchIdentity(match) {
 }
 
 export function toRefereeMatch(row) {
+  const hasPromiedosDate = row?.matchDate !== undefined && row?.matchDate !== null;
   const dateValue = getValue(row, "Date", "matchDate", "date");
-  const parsedDate = parseMatchDate(dateValue);
+  const parsedDate = hasPromiedosDate
+    ? parsePromiedosMatchDate(dateValue)
+    : parseMatchDate(dateValue);
   const referee = String(getValue(row, "Referee", "referee") || "").trim();
   const homeTeam = canonicalizeTeamName(getValue(row, "HomeTeam", "homeTeam"));
   const awayTeam = canonicalizeTeamName(getValue(row, "AwayTeam", "awayTeam"));
