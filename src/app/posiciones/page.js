@@ -130,11 +130,21 @@ function obtenerPartidoEnVivo(teamId, liveGames) {
   ) || null;
 }
 
-function obtenerMarcadorEquipo(game, teamId) {
+function obtenerMarcadorPartido(game) {
+  if (!Array.isArray(game?.scores) || game.scores.length < 2) return null;
+  const local = obtenerScore(game.scores[0]);
+  const visitante = obtenerScore(game.scores[1]);
+  if (local == null || visitante == null) return null;
+  return `${local}-${visitante}`;
+}
+
+function obtenerColorMarcador(game, teamId) {
   const index = game?.teams?.findIndex(team => String(team?.id) === String(teamId));
-  if (index == null || index < 0) return null;
-  const score = obtenerScore(game?.scores?.[index]);
-  return score == null ? "–" : score;
+  if (index == null || index < 0) return C.amber;
+  const propio = obtenerScore(game?.scores?.[index]);
+  const rival = obtenerScore(game?.scores?.[index === 0 ? 1 : 0]);
+  if (propio == null || rival == null || propio === rival) return C.amber;
+  return propio > rival ? C.green : C.red;
 }
 
 function identificarEstadistica(column) {
@@ -262,7 +272,7 @@ function TablaPosiciones({ item, liveGames = [] }) {
               const pos    = fila.num ?? i + 1;
               const teamId = fila?.entity?.object?.id;
               const liveGame = obtenerPartidoEnVivo(teamId, liveGames);
-              const liveScore = liveGame ? obtenerMarcadorEquipo(liveGame, teamId) : null;
+              const liveScore = liveGame ? obtenerMarcadorPartido(liveGame) : null;
               return (
                 <tr key={`${nombre}-${i}`} style={{ background: i % 2 === 0 ? C.surface : C.surfaceAlt, borderBottom: `1px solid ${C.borderSub}` }}>
                   <td style={tdCenterS}>{pos}</td>
@@ -272,7 +282,16 @@ function TablaPosiciones({ item, liveGames = [] }) {
                     {liveGame && (
                       <span
                         title="Partido en vivo"
-                        style={{ color: C.green, fontWeight: 800, marginLeft: "auto", whiteSpace: "nowrap" }}
+                        style={{
+                          background: obtenerColorMarcador(liveGame, teamId),
+                          color: C.white,
+                          borderRadius: 2,
+                          padding: "1px 4px",
+                          fontSize: 10,
+                          fontWeight: 800,
+                          marginLeft: "auto",
+                          whiteSpace: "nowrap",
+                        }}
                       >
                         {liveScore}
                       </span>

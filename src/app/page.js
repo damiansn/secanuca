@@ -1762,6 +1762,10 @@ function obtenerMinutoLive(game) {
       txt.includes("descanso") ||
       txt.includes("interval")
     ) return "ET";
+    const agregado = txt.match(/(\d{1,3})\s*\+\s*(\d{1,2})/);
+    if (agregado) {
+      return `${parseInt(agregado[1], 10)}+${parseInt(agregado[2], 10)}`;
+    }
     const m = txt.match(/(\d{1,3})/);
     if (m) return parseInt(m[1], 10);
   }
@@ -1769,6 +1773,13 @@ function obtenerMinutoLive(game) {
   const statusName = String(game?.status?.name || "").toLowerCase();
   if (statusName.includes("ht") || statusName.includes("half") || statusName.includes("entretiempo")) return "ET";
   return null;
+}
+
+function formatearMinutoLive(minuto) {
+  if (minuto === "ET" || minuto === null) return minuto;
+  if (typeof minuto === "string" && /^\d+\+\d+$/.test(minuto)) return `${minuto}'`;
+  if (typeof minuto === "number" && minuto > 45) return `45+${minuto - 45}'`;
+  return `${minuto}'`;
 }
 
 function obtenerFechaObjeto(game) {
@@ -1853,10 +1864,7 @@ function obtenerEstado(game) {
 
   if (en === 2) {
     const min = obtenerMinutoLive(game);
-    let textoMin;
-    if (min === "ET") textoMin = "ET";
-    else if (min === 45) textoMin = "ET";
-    else textoMin = min !== null ? `${min}'` : "EN VIVO";
+    const textoMin = min === 45 ? "ET" : formatearMinutoLive(min) || "EN VIVO";
     return { texto: textoMin, tipo: "live" };
   }
   if (en === 3) {
