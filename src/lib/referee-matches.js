@@ -124,7 +124,7 @@ export function toRefereeMatch(row) {
   const competition = String(getValue(row, "League", "league") || "").trim();
   const season = String(getValue(row, "Season", "season") || "").trim();
   const result = String(getValue(row, "FTR", "ftr") || "").trim().toUpperCase();
-  const id = String(row?.id || [
+  const id = String(getValue(row, "PromiedosId", "promiedosId", "id") || [
     "csv",
     parsedDate.date,
     season,

@@ -8,6 +8,7 @@ import {
   REFEREE_MATCHES_REDIS_KEY,
   canonicalizeTeamName,
 } from "./src/lib/referee-matches.js";
+import { extractRefereeMatchStatistics } from "./src/lib/referee-match-statistics.js";
 
 dotenv.config();
 
@@ -23,9 +24,14 @@ function normalizarIdentidadCsv(value) {
 }
 
 function fechaParaCsv(matchDate) {
-  const match = String(matchDate || "").match(/^(\d{2})-(\d{2})-(\d{4})/);
-  if (!match) return String(matchDate || "").replace(/-/g, "/");
-  return `${match[1]}/${match[2]}/${match[3]}`;
+  const date = String(matchDate || "").trim();
+  const dayFirst = date.match(/^(\d{2})[-/](\d{2})[-/](\d{4})/);
+  if (dayFirst) return `${dayFirst[1]}/${dayFirst[2]}/${dayFirst[3]}`;
+
+  const yearFirst = date.match(/^(\d{4})[-/](\d{2})[-/](\d{2})/);
+  if (yearFirst) return `${yearFirst[3]}/${yearFirst[2]}/${yearFirst[1]}`;
+
+  return date;
 }
 
 function escaparCsv(value) {
@@ -44,7 +50,7 @@ async function agregarPartidoAlCsv(match) {
     const fields = line.match(/"([^"]*)"/g)?.map(field => field.slice(1, -1)) || [];
     if (fields.length < 7) return false;
     return [
-      fields[0],
+      fechaParaCsv(fields[0]),
       canonicalizeTeamName(fields[4]),
       canonicalizeTeamName(fields[5]),
       fields[6],
@@ -67,6 +73,7 @@ async function agregarPartidoAlCsv(match) {
     "",
     "",
     "",
+    match.id,
   ].map(escaparCsv).join(",");
   await appendFile(REFEREE_MATCHES_CSV_PATH, `\n${row}\n`, "utf8");
   return true;
@@ -534,7 +541,7 @@ function esPartidoFinalizado(game) {
   return statusText.includes("final") || statusText.includes("finished");
 }
 
-async function obtenerArbitroDePromiedos(gameId) {
+async function obtenerDetalleDePromiedos(gameId) {
   const response = await fetch(`https://api.promiedos.com.ar/gamecenter/${encodeURIComponent(gameId)}`, {
     headers: {
       Accept: "application/json",
@@ -550,11 +557,9 @@ async function obtenerArbitroDePromiedos(gameId) {
   if (!response.ok) {
     throw new Error(`Promiedos devolvió HTTP ${response.status}`);
   }
-
   const data = await response.json();
-  const referee = obtenerArbitroPartido(data?.game);
-  if (!referee) throw new Error("El detalle del partido no informa el árbitro");
-  return referee;
+  if (!data?.game) throw new Error("El detalle del partido no está disponible");
+  return data.game;
 }
 
 async function registrarPartidosFinalizados(partidos) {
@@ -584,11 +589,39 @@ async function registrarPartidosFinalizados(partidos) {
         const homeGoals = obtenerScoreEquipo(game, 0);
         const awayGoals = obtenerScoreEquipo(game, 1);
         const matchDate = String(game.start_time ?? game.date ?? game.matchDate ?? "").trim();
-        if (!homeTeam || !awayTeam || homeGoals === null || awayGoals === null || !matchDate) {
-          throw new Error("Faltan fecha, equipos o resultado en el partido finalizado");
+        if (!homeTeam || !awayTeam || !matchDate) {
+          throw new Error("Faltan fecha o nombres de equipos");
+        }
+        if (
+          !Number.isInteger(homeGoals)
+          || homeGoals < 0
+          || !Number.isInteger(awayGoals)
+          || awayGoals < 0
+        ) {
+          throw new Error("El marcador no es un resultado entero no negativo");
         }
 
-        const referee = obtenerArbitroPartido(game) || await obtenerArbitroDePromiedos(id);
+        let detail = game;
+        if (!obtenerArbitroPartido(game) || !Array.isArray(game.statistics) || game.statistics.length === 0) {
+          try {
+            detail = await obtenerDetalleDePromiedos(id);
+          } catch (error) {
+            if (!obtenerArbitroPartido(game)) throw error;
+            console.warn(`No se pudieron obtener estadísticas del partido ${id}:`, error.message);
+          }
+        }
+
+        const referee = obtenerArbitroPartido(game) || obtenerArbitroPartido(detail);
+        if (!referee) throw new Error("El detalle del partido no informa el árbitro");
+        const statistics = extractRefereeMatchStatistics(
+          Array.isArray(detail.statistics) && detail.statistics.length > 0 ? detail : game
+        );
+        const missingStatistics = Object.entries(statistics)
+          .filter(([, value]) => value === null)
+          .map(([name]) => name);
+        if (missingStatistics.length > 0) {
+          console.warn(`Promiedos no informó ${missingStatistics.join(", ")} en el partido ${id}`);
+        }
         const season = matchDate.match(/\b(20\d{2})\b/)?.[1];
         if (!season) throw new Error("No se pudo determinar la temporada del partido");
         const match = {
@@ -603,11 +636,15 @@ async function registrarPartidosFinalizados(partidos) {
           FTHG: String(homeGoals),
           FTAG: String(awayGoals),
           FTR: homeGoals > awayGoals ? "H" : homeGoals < awayGoals ? "A" : "D",
+          Fouls: statistics.fouls == null ? "" : String(statistics.fouls),
+          Cards: statistics.cards == null ? "" : String(statistics.cards),
+          Reds: statistics.reds == null ? "" : String(statistics.reds),
+          Penalties: statistics.penalties == null ? "" : String(statistics.penalties),
         };
-        await redis.hset(REFEREE_MATCHES_REDIS_KEY, id, JSON.stringify(match));
         await agregarPartidoAlCsv(match);
+        await redis.hset(REFEREE_MATCHES_REDIS_KEY, id, JSON.stringify(match));
         registrados += 1;
-        console.log(`Partido de árbitros registrado: ${match.homeTeam} ${homeGoals}-${awayGoals} ${awayTeam} (${referee})`);
+        console.log(`Partido de árbitros registrado: ${match.homeTeam} ${homeGoals}-${awayGoals} ${awayTeam} (${referee}, Promiedos ID ${id})`);
       } catch (error) {
         console.error(`No se pudo registrar el partido finalizado ${id}:`, error.message);
       }
