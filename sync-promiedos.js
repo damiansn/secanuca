@@ -1,7 +1,7 @@
 import puppeteer from "puppeteer";
 import Redis from "ioredis";
 import dotenv from "dotenv";
-import { appendFile, readFile } from "node:fs/promises";
+import { appendFile, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { agregarPenalesScrapeados } from "./src/lib/promiedos-penalties.js";
 import {
@@ -38,16 +38,28 @@ function escaparCsv(value) {
   return `"${String(value ?? "").replace(/"/g, '""')}"`;
 }
 
+function parsearFilaCsv(line) {
+  return line.match(/"(?:[^"]|"")*"|[^,]+/g)?.map(field =>
+    field.startsWith('"') && field.endsWith('"')
+      ? field.slice(1, -1).replace(/""/g, '"')
+      : field
+  ) || [];
+}
+
 async function agregarPartidoAlCsv(match) {
   const contents = await readFile(REFEREE_MATCHES_CSV_PATH, "utf8");
+  const lines = contents.split(/\r?\n/);
+  const newline = contents.includes("\r\n") ? "\r\n" : "\n";
+  const headers = parsearFilaCsv(lines[0]);
   const identity = [
     fechaParaCsv(match.matchDate),
     match.homeTeam,
     match.awayTeam,
     match.referee,
   ].map(normalizarIdentidadCsv).join("|");
-  const yaExiste = contents.split(/\r?\n/).some(line => {
-    const fields = line.match(/"([^"]*)"/g)?.map(field => field.slice(1, -1)) || [];
+  const existingIndex = lines.findIndex((line, index) => {
+    if (index === 0) return false;
+    const fields = parsearFilaCsv(line);
     if (fields.length < 7) return false;
     return [
       fechaParaCsv(fields[0]),
@@ -56,7 +68,36 @@ async function agregarPartidoAlCsv(match) {
       fields[6],
     ].map(normalizarIdentidadCsv).join("|") === identity;
   });
-  if (yaExiste) return false;
+
+  if (existingIndex !== -1) {
+    const statisticsColumns = [
+      ["Fouls", match.Fouls],
+      ["Cards", match.Cards],
+      ["Reds", match.Reds],
+      ["Penalties", match.Penalties],
+    ];
+    let updated = false;
+    for (const [column, value] of statisticsColumns) {
+      const columnIndex = headers.indexOf(column);
+      if (columnIndex < 0) throw new Error(`Falta la columna ${column} en el CSV de árbitros`);
+      const fields = parsearFilaCsv(lines[existingIndex]);
+      if (fields[columnIndex] === "" && value !== "") {
+        fields[columnIndex] = value;
+        lines[existingIndex] = fields.map(escaparCsv).join(",");
+        updated = true;
+      }
+    }
+    const idIndex = headers.indexOf("PromiedosId");
+    if (idIndex < 0) throw new Error("Falta la columna PromiedosId en el CSV de árbitros");
+    const fields = parsearFilaCsv(lines[existingIndex]);
+    if (fields[idIndex] === "" && match.id) {
+      fields[idIndex] = match.id;
+      lines[existingIndex] = fields.map(escaparCsv).join(",");
+      updated = true;
+    }
+    if (updated) await writeFile(REFEREE_MATCHES_CSV_PATH, lines.join(newline), "utf8");
+    return updated;
+  }
 
   const row = [
     fechaParaCsv(match.matchDate),
@@ -75,7 +116,7 @@ async function agregarPartidoAlCsv(match) {
     "",
     match.id,
   ].map(escaparCsv).join(",");
-  await appendFile(REFEREE_MATCHES_CSV_PATH, `\n${row}\n`, "utf8");
+  await appendFile(REFEREE_MATCHES_CSV_PATH, `${contents.endsWith("\n") ? "" : newline}${row}${newline}`, "utf8");
   return true;
 }
 
@@ -580,7 +621,20 @@ async function registrarPartidosFinalizados(partidos) {
       if (!esPartidoFinalizado(game) || !game?.id) continue;
       const id = String(game.id);
       if (!/^[a-z0-9]{1,32}$/i.test(id)) continue;
-      if (await redis.hexists(REFEREE_MATCHES_REDIS_KEY, id)) continue;
+      const storedValue = await redis.hget(REFEREE_MATCHES_REDIS_KEY, id);
+      if (storedValue) {
+        try {
+          const storedMatch = JSON.parse(storedValue);
+          const hasAllStatistics = ["Fouls", "Cards", "Reds", "Penalties"]
+            .every(field => storedMatch[field] !== "" && storedMatch[field] != null);
+          if (hasAllStatistics) {
+            await agregarPartidoAlCsv({ ...storedMatch, id: storedMatch.id || id });
+            continue;
+          }
+        } catch (error) {
+          console.warn(`Se volverá a procesar el registro Redis inválido ${id}:`, error.message);
+        }
+      }
 
       try {
         const teams = obtenerEquiposPartido(game);
@@ -602,7 +656,10 @@ async function registrarPartidosFinalizados(partidos) {
         }
 
         let detail = game;
-        if (!obtenerArbitroPartido(game) || !Array.isArray(game.statistics) || game.statistics.length === 0) {
+        let statistics = extractRefereeMatchStatistics(game);
+        const needsDetail = !obtenerArbitroPartido(game)
+          || Object.values(statistics).some(value => value === null);
+        if (needsDetail) {
           try {
             detail = await obtenerDetalleDePromiedos(id);
           } catch (error) {
@@ -613,8 +670,12 @@ async function registrarPartidosFinalizados(partidos) {
 
         const referee = obtenerArbitroPartido(game) || obtenerArbitroPartido(detail);
         if (!referee) throw new Error("El detalle del partido no informa el árbitro");
-        const statistics = extractRefereeMatchStatistics(
-          Array.isArray(detail.statistics) && detail.statistics.length > 0 ? detail : game
+        const detailStatistics = extractRefereeMatchStatistics(detail);
+        statistics = Object.fromEntries(
+          Object.keys(statistics).map(field => [
+            field,
+            detailStatistics[field] ?? statistics[field],
+          ])
         );
         const missingStatistics = Object.entries(statistics)
           .filter(([, value]) => value === null)

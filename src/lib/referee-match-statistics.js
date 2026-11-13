@@ -52,5 +52,16 @@ export function extractRefereeMatchStatistics(game) {
     }
   }
 
+  if (result.penalties === null && Array.isArray(game?.events)) {
+    const events = game.events.flatMap(stage => (
+      Array.isArray(stage?.rows)
+        ? stage.rows.flatMap(row => Array.isArray(row?.events) ? row.events : [])
+        : []
+    ));
+    if (events.length > 0) {
+      result.penalties = events.filter(event => [3, 10].includes(Number(event?.type))).length;
+    }
+  }
+
   return result;
 }
